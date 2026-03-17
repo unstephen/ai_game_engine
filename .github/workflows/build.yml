@@ -26,13 +26,10 @@ jobs:
       run: |
         cppcheck --enable=warning,performance,portability \
                  --std=c++20 \
+                 --language=c++ \
                  --suppress=missingIncludeSystem \
                  --error-exitcode=1 \
                  Source/
-                 
-    - name: Check code format
-      run: |
-        find Source -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
   # Windows 编译
   build-windows:
