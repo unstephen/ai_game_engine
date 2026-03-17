@@ -13,8 +13,110 @@
 #include <Windows.h>
 #include <wrl/client.h>
 #include <memory>
+#include <d3d12.h>
 
 using Microsoft::WRL::ComPtr;
+
+// D3D12 辅助结构（避免依赖 d3dx12.h）
+struct CD3DX12_HEAP_PROPERTIES : public D3D12_HEAP_PROPERTIES {
+    CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE type) {
+        Type = type;
+        CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        CreationNodeMask = 1;
+        VisibleNodeMask = 1;
+    }
+};
+
+struct CD3DX12_RESOURCE_DESC : public D3D12_RESOURCE_DESC {
+    CD3DX12_RESOURCE_DESC() = default;
+    static CD3DX12_RESOURCE_DESC Buffer(UINT64 size, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE) {
+        CD3DX12_RESOURCE_DESC desc = {};
+        desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        desc.Alignment = 0;
+        desc.Width = size;
+        desc.Height = 1;
+        desc.DepthOrArraySize = 1;
+        desc.MipLevels = 1;
+        desc.Format = DXGI_FORMAT_UNKNOWN;
+        desc.SampleDesc.Count = 1;
+        desc.SampleDesc.Quality = 0;
+        desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        desc.Flags = flags;
+        return desc;
+    }
+};
+
+struct CD3DX12_ROOT_SIGNATURE_DESC : public D3D12_ROOT_SIGNATURE_DESC {
+    CD3DX12_ROOT_SIGNATURE_DESC() = default;
+    void Init(
+        UINT numParameters,
+        const D3D12_ROOT_PARAMETER* parameters,
+        UINT numStaticSamplers,
+        const D3D12_STATIC_SAMPLER_DESC* staticSamplers,
+        D3D12_ROOT_SIGNATURE_FLAGS flags) {
+        D3D12_ROOT_SIGNATURE_DESC::NumParameters = numParameters;
+        D3D12_ROOT_SIGNATURE_DESC::pParameters = parameters;
+        D3D12_ROOT_SIGNATURE_DESC::NumStaticSamplers = numStaticSamplers;
+        D3D12_ROOT_SIGNATURE_DESC::pStaticSamplers = staticSamplers;
+        D3D12_ROOT_SIGNATURE_DESC::Flags = flags;
+    }
+};
+
+struct CD3DX12_RESOURCE_BARRIER {
+    static D3D12_RESOURCE_BARRIER Transition(
+        ID3D12Resource* resource,
+        D3D12_RESOURCE_STATES stateBefore,
+        D3D12_RESOURCE_STATES stateAfter,
+        D3D12_RESOURCE_BARRIER_FLAGS flags = D3D12_RESOURCE_BARRIER_FLAG_NONE) {
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = flags;
+        barrier.Transition.pResource = resource;
+        barrier.Transition.StateBefore = stateBefore;
+        barrier.Transition.StateAfter = stateAfter;
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        return barrier;
+    }
+};
+
+// 简化的 D3D12 默认值宏
+#define D3D12_DEFAULT 0
+
+struct CD3DX12_RASTERIZER_DESC {
+    CD3DX12_RASTERIZER_DESC(int) {
+        FillMode = D3D12_FILL_MODE_SOLID;
+        CullMode = D3D12_CULL_MODE_BACK;
+        FrontCounterClockwise = FALSE;
+        DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+        DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+        SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+        DepthClipEnable = TRUE;
+        MultisampleEnable = FALSE;
+        AntialiasedLineEnable = FALSE;
+        ForcedSampleCount = 0;
+        ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+    }
+};
+
+struct CD3DX12_BLEND_DESC {
+    CD3DX12_BLEND_DESC(int) {
+        AlphaToCoverageEnable = FALSE;
+        IndependentBlendEnable = FALSE;
+        for (UINT i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
+            RenderTarget[i].BlendEnable = FALSE;
+            RenderTarget[i].LogicOpEnable = FALSE;
+            RenderTarget[i].SrcBlend = D3D12_BLEND_ONE;
+            RenderTarget[i].DestBlend = D3D12_BLEND_ZERO;
+            RenderTarget[i].BlendOp = D3D12_BLEND_OP_ADD;
+            RenderTarget[i].SrcBlendAlpha = D3D12_BLEND_ONE;
+            RenderTarget[i].DestBlendAlpha = D3D12_BLEND_ZERO;
+            RenderTarget[i].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+            RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;
+            RenderTarget[i].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+        }
+    }
+};
 
 namespace Engine {
 namespace Samples {
