@@ -7,6 +7,7 @@
 
 #include <d3dcompiler.h>
 #include <dxgi1_6.h>
+#include <d3dx12/d3dx12.h>
 #include <sstream>
 
 #pragma comment(lib, "d3dcompiler.lib")
@@ -470,8 +471,10 @@ void TriangleApp::RenderFrame() {
         IID_PPV_ARGS(&cmdList)
     );
     
-    // 4. PIX 标记
+    // 4. PIX 标记（如果有 PIX）
+#ifdef _PIX_H_
     PIXSetMarker(cmdList.Get(), 0, L"RenderFrame");
+#endif
     
     // 5. 设置视口和裁剪
     D3D12_VIEWPORT viewport = {};

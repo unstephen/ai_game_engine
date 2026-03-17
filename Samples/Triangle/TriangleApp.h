@@ -11,7 +11,10 @@
 #include "D3D12FrameResourceManager.h"
 
 #include <Windows.h>
+#include <wrl/client.h>
 #include <memory>
+
+using Microsoft::WRL::ComPtr;
 
 namespace Engine {
 namespace Samples {
