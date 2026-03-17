@@ -4,7 +4,8 @@
 
 #include "ICommandList.h"
 
-namespace Engine::RHI {
+namespace Engine::RHI
+{
 
 // 占位实现 - 将在 Task 010 中实现
 

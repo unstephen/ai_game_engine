@@ -5,25 +5,28 @@
 #pragma once
 
 #include "Window.h"
-#include <vector>
+
 #include <memory>
+#include <vector>
 
-namespace Engine {
+namespace Engine
+{
 
-class ENGINE_CORE_API WindowManager {
-public:
+class ENGINE_CORE_API WindowManager
+{
+  public:
     static WindowManager& GetInstance();
-    
+
     IWindow* CreateWindow(const WindowDesc& desc);
-    void DestroyWindow(IWindow* window);
-    
+    void     DestroyWindow(IWindow* window);
+
     void PollEvents();
     void WaitEvents();
-    
-    size_t GetWindowCount() const { return m_windows.size(); }
+
+    size_t   GetWindowCount() const { return m_windows.size(); }
     IWindow* GetWindow(size_t index) const;
-    
-private:
+
+  private:
     WindowManager() = default;
     std::vector<std::unique_ptr<IWindow>> m_windows;
 };

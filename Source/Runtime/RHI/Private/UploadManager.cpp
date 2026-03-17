@@ -4,7 +4,8 @@
 
 #include "IUploadManager.h"
 
-namespace Engine::RHI {
+namespace Engine::RHI
+{
 
 // 占位实现 - 将在 Task 005 中实现
 

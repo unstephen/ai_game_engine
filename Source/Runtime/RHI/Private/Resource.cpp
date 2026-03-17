@@ -4,7 +4,8 @@
 
 #include "IResource.h"
 
-namespace Engine::RHI {
+namespace Engine::RHI
+{
 
 // 占位实现 - 将在资源任务中实现
 

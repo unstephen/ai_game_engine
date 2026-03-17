@@ -4,20 +4,20 @@
 
 #pragma once
 
-#include "RHICore.h"
-#include "IDevice.h"
-#include "ICommandList.h"
-#include "IResource.h"
 #include "IBuffer.h"
-#include "ITexture.h"
-#include "IShader.h"
-#include "IPipelineState.h"
-#include "IRootSignature.h"
-#include "ISwapChain.h"
-#include "IFrameResourceManager.h"
+#include "ICommandList.h"
 #include "IDescriptorAllocator.h"
-#include "IUploadManager.h"
+#include "IDevice.h"
 #include "IFence.h"
+#include "IFrameResourceManager.h"
+#include "IPipelineState.h"
+#include "IResource.h"
+#include "IRootSignature.h"
+#include "IShader.h"
+#include "ISwapChain.h"
+#include "ITexture.h"
+#include "IUploadManager.h"
+#include "RHICore.h"
 
 // =============================================================================
 // 命名空间
@@ -26,10 +26,11 @@
 /**
  * @namespace Engine::RHI
  * @brief 渲染硬件接口核心命名空间
- * 
+ *
  * 提供跨图形 API（D3D12/Vulkan/Metal）的统一抽象层
  */
-namespace Engine::RHI {
+namespace Engine::RHI
+{
 
 // =============================================================================
 // 版本信息
@@ -39,7 +40,8 @@ constexpr uint32_t RHI_VERSION_MAJOR = 0;
 constexpr uint32_t RHI_VERSION_MINOR = 2;
 constexpr uint32_t RHI_VERSION_PATCH = 0;
 
-inline const char* GetRHIVersionString() {
+inline const char* GetRHIVersionString()
+{
     return "0.2.0";
 }
 
@@ -90,14 +92,15 @@ IUploadManager* GetUploadManager();
 // =============================================================================
 
 #ifdef RHI_DEBUG
-    #define RHI_VERIFY_CALL(call) \
-        do { \
-            auto _result = (call); \
-            if (Engine::RHI::IsFailure(_result)) { \
-                RHI_LOG_ERROR("RHI call failed: %s at %s:%d", \
-                    Engine::RHI::GetErrorName(_result), __FILE__, __LINE__); \
-            } \
-        } while(0)
+#define RHI_VERIFY_CALL(call)                                                                                          \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        auto _result = (call);                                                                                         \
+        if (Engine::RHI::IsFailure(_result))                                                                           \
+        {                                                                                                              \
+            RHI_LOG_ERROR("RHI call failed: %s at %s:%d", Engine::RHI::GetErrorName(_result), __FILE__, __LINE__);     \
+        }                                                                                                              \
+    } while (0)
 #else
-    #define RHI_VERIFY_CALL(call) (void)(call)
+#define RHI_VERIFY_CALL(call) (void)(call)
 #endif

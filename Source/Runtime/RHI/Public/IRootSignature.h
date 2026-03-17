@@ -5,15 +5,18 @@
 #pragma once
 
 #include "RHICore.h"
+
 #include <vector>
 
-namespace Engine::RHI {
+namespace Engine::RHI
+{
 
 // =============================================================================
 // 根参数类型
 // =============================================================================
 
-enum class RootParameterType : uint8_t {
+enum class RootParameterType : uint8_t
+{
     Constant32Bit,
     DescriptorTable,
     RootDescriptor,
@@ -23,21 +26,23 @@ enum class RootParameterType : uint8_t {
 // 根签名描述
 // =============================================================================
 
-struct RootSignatureDesc {
+struct RootSignatureDesc
+{
     // TODO: 更详细的根签名参数
-    uint32_t numParameters = 0;
-    uint32_t numStaticSamplers = 0;
-    const char* debugName = nullptr;
+    uint32_t    numParameters     = 0;
+    uint32_t    numStaticSamplers = 0;
+    const char* debugName         = nullptr;
 };
 
 // =============================================================================
 // IRootSignature - 根签名接口
 // =============================================================================
 
-class RHI_API IRootSignature {
-public:
+class RHI_API IRootSignature
+{
+  public:
     virtual ~IRootSignature() = default;
-    
+
     /// 获取根签名句柄
     virtual void* GetNativeHandle() const = 0;
 };
