@@ -56,8 +56,10 @@ endif()
 
 # 警告级别
 if(MSVC)
-    add_compile_options(/W4 /WX-$<BOOL:${ENGINE_WARNINGS_AS_ERRORS}>)
-    add_compile_options(/MP)  # 多处理器编译
+    add_compile_options(/W4 /MP)  # 多处理器编译
+    if(ENGINE_WARNINGS_AS_ERRORS)
+        add_compile_options(/WX)
+    endif()
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
     if(ENGINE_WARNINGS_AS_ERRORS)
