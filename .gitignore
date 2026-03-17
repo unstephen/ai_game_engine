@@ -1,0 +1,43 @@
+# C/C++ 编译产物
+Build/
+build/
+bin/
+obj/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.exp
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 测试产物
+Tests/Build/
+*.gcno
+*.gcda
+
+# 日志
+*.log
+
+# 临时文件
+*.tmp
+*.bak
