@@ -4,6 +4,21 @@
 
 #pragma once
 
+// =============================================================================
+// 平台宏 - 必须在任何标准库头文件之前定义
+// =============================================================================
+
+#if defined(_WIN32) || defined(_WIN64)
+#define RHI_PLATFORM_WINDOWS 1
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+#endif
+
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -11,16 +26,6 @@
 #include <span>
 #include <string_view>
 #include <vector>
-
-// =============================================================================
-// 平台宏
-// =============================================================================
-
-#if defined(_WIN32) || defined(_WIN64)
-#define RHI_PLATFORM_WINDOWS 1
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#endif
 
 #if defined(__GNUC__) || defined(__clang__)
 #define RHI_COMPILER_GCC 1
