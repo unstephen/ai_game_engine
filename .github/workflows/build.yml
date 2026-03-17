@@ -1,15 +1,44 @@
-name: Build Engine
+name: CI
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
+  # Linux 语法检查
+  lint-linux:
+    runs-on: ubuntu-latest
+    name: Linux 语法检查
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install tools
+      run: |
+        sudo apt update
+        sudo apt install -y cppcheck clang-format
+        
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=warning,performance,portability \
+                 --std=c++20 \
+                 --suppress=missingIncludeSystem \
+                 --error-exitcode=1 \
+                 Source/
+                 
+    - name: Check code format
+      run: |
+        find Source -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
+
+  # Windows 编译
   build-windows:
     runs-on: windows-latest
+    name: Windows 编译
+    needs: lint-linux  # 语法检查通过后才编译
     
     steps:
     - name: Checkout code
