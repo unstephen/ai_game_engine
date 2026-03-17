@@ -1,67 +1,119 @@
----
-# Symphony 本地任务队列配置
-name: "3D 游戏引擎 Phase 1 开发 - 本地模式"
-description: "不依赖 Linear，使用本地任务文件"
+# 分支工作流
 
-# 本地模式配置
-tracker:
-  kind: local
-  tasks_file: "TASKS_QUEUE.md"
+## 分支说明
 
-# 轮询配置
-poll_interval_seconds: 30
-
-# 工作区配置
-workspace_root: "/root/.openclaw/workspace/engine/tasks-workspace"
-
-# 并发配置
-max_concurrent_tasks: 2
-
-# Agent 配置
-agent:
-  executable: "claude"
-  args:
-    - "--permission-mode"
-    - "bypassPermissions"
-    - "--print"
-  timeout_seconds: 1800
-
-# 日志配置
-logging:
-  level: "info"
-  format: "text"
+| 分支 | 用途 | 保护 |
+|------|------|------|
+| `main` | 稳定版本，可发布的代码 | ✅ 需要 CI 通过 |
+| `dev` | 开发分支，日常开发在这里 | 自动 CI 检查 |
 
 ---
 
-# 引擎开发工作流
+## 开发流程
 
-## 角色
+### 1️⃣ 日常开发
 
-你是资深图形引擎程序员，负责实现自研 3D 游戏引擎的 RHI 层。
+```bash
+# 切换到 dev 分支
+git checkout dev
 
-## 规范
+# 拉取最新代码
+git pull
 
-### 代码质量
-- 现代 C++20，RAII，智能指针
-- 完整错误检查，详细中文注释
-- Google Test 单元测试
+# 编写代码...
 
-### 文件组织
-```
-engine/
-├── Source/Runtime/RHI/D3D12/
-│   ├── Public/*.h
-│   └── Private/*.cpp
-├── Tests/*.cpp
-└── Tasks/phase1-task-XXX.md
+# 提交（会自动运行 pre-commit 检查）
+git add .
+git commit -m "feat: 添加新功能"
+
+# 推送到 dev（触发 GitHub Actions）
+git push
 ```
 
-### 验收标准
-- [ ] 编译无警告
-- [ ] 测试通过
-- [ ] ComPtr 管理资源
-- [ ] 完整错误处理
+### 2️⃣ 合并到 main
 
-## 任务队列
+当 dev 分支稳定后：
 
-查看 `TASKS_QUEUE.md` 获取当前任务列表。
+**方式一：Pull Request（推荐）**
+1. 打开 https://github.com/unstephen/ai_game_engine/pull/new/dev
+2. 创建 PR：`dev` → `main`
+3. 等待 CI 检查通过
+4. 合并 PR
+
+**方式二：命令行**
+```bash
+git checkout main
+git pull
+git merge dev
+git push
+```
+
+---
+
+## 分支保护设置（推荐）
+
+在 GitHub 设置分支保护，防止直接 push 到 main：
+
+1. 打开 https://github.com/unstephen/ai_game_engine/settings/branches
+2. 点击 **Add branch protection rule**
+3. Branch name pattern: `main`
+4. 勾选：
+   - ✅ Require a pull request before merging
+   - ✅ Require status checks to pass before merging
+     - 选择 `lint-linux` 和 `build-windows`
+5. 点击 **Create**
+
+---
+
+## 工作流图
+
+```
+                    ┌─────────────┐
+                    │   dev 分支   │
+                    │  (日常开发)  │
+                    └──────┬──────┘
+                           │
+                    git push
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │ GitHub CI   │
+                    │ - cppcheck  │
+                    │ - 编译 exe  │
+                    └──────┬──────┘
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+           ✅ 通过                    ❌ 失败
+              │                         │
+              ▼                         ▼
+       ┌─────────────┐           ┌─────────────┐
+       │ 合并到 main │           │ 修复代码    │
+       │ (PR/merge)  │           │ 重新 push   │
+       └─────────────┘           └─────────────┘
+              │
+              ▼
+       ┌─────────────┐
+       │ 下载 exe    │
+       │ (Artifacts) │
+       └─────────────┘
+```
+
+---
+
+## 快捷命令
+
+```bash
+# 查看当前分支
+git branch
+
+# 切换分支
+git checkout dev     # 切换到 dev
+git checkout main    # 切换到 main
+
+# 同步远程分支
+git fetch --all
+
+# 查看状态
+git status
+```
