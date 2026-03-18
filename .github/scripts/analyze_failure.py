@@ -126,14 +126,16 @@ def get_workflow_logs(run_id, token=None):
 
 def get_job_logs(job_id, token=None):
     """获取作业详细日志"""
-    headers = {"Accept": "application/vnd.github.v3+json"}
-    if token:
-        headers["Authorization"] = f"token {token}"
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "Authorization": f"token {token}"
+    } if token else {"Accept": "application/vnd.github.v3+json"}
     
     # 尝试 1: 直接下载日志
     url = f"{GITHUB_API}/repos/unstephen/ai_game_engine/actions/jobs/{job_id}/logs"
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as resp:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=30) as resp:
             logs = resp.read().decode('utf-8', errors='ignore')
             if logs.strip():
                 return logs
@@ -143,7 +145,8 @@ def get_job_logs(job_id, token=None):
     # 尝试 2: 获取作业详情中的错误摘要
     try:
         detail_url = f"{GITHUB_API}/repos/unstephen/ai_game_engine/actions/jobs/{job_id}"
-        with urllib.request.urlopen(urllib.request.Request(detail_url, headers=headers), timeout=10) as resp:
+        req = urllib.request.Request(detail_url, headers=headers)
+        with urllib.request.urlopen(req, timeout=10) as resp:
             job_data = json.loads(resp.read().decode())
             if job_data.get('output'):
                 summary = job_data['output'].get('summary', '')
@@ -154,35 +157,45 @@ def get_job_logs(job_id, token=None):
     except Exception as e2:
         print(f"⚠️ 也无法获取作业详情：{e2}")
     
-    # 尝试 3: 下载 artifact 中的日志文件
+    # 尝试 3: 下载 artifact 中的日志文件（需要处理重定向）
     print("🔍 尝试从 artifact 获取日志...")
     try:
         # 获取最近的 workflow run
         run_url = f"{GITHUB_API}/repos/unstephen/ai_game_engine/actions/runs?per_page=5"
-        with urllib.request.urlopen(urllib.request.Request(run_url, headers=headers), timeout=10) as resp:
+        req = urllib.request.Request(run_url, headers=headers)
+        with urllib.request.urlopen(req, timeout=10) as resp:
             runs_data = json.loads(resp.read().decode())
             # 获取 artifact
             for run in runs_data.get('workflow_runs', []):
                 artifacts_url = run.get('artifacts_url', '')
                 if artifacts_url:
-                    with urllib.request.urlopen(urllib.request.Request(artifacts_url, headers=headers), timeout=10) as resp2:
+                    req2 = urllib.request.Request(artifacts_url, headers=headers)
+                    with urllib.request.urlopen(req2, timeout=10) as resp2:
                         artifacts_data = json.loads(resp2.read().decode())
                         for artifact in artifacts_data.get('artifacts', []):
                             if artifact.get('name') == 'build-error-log':
                                 print(f"✅ 找到错误日志 artifact: {artifact['name']}")
-                                # 下载 artifact
+                                # 下载 artifact（需要处理重定向）
                                 download_url = artifact.get('archive_download_url', '')
                                 if download_url:
-                                    req = urllib.request.Request(download_url, headers=headers)
-                                    with urllib.request.urlopen(req, timeout=30) as resp3:
-                                        import zipfile
-                                        import io
-                                        zip_data = io.BytesIO(resp3.read())
-                                        with zipfile.ZipFile(zip_data, 'r') as zip_ref:
-                                            for name in zip_ref.namelist():
-                                                if name.endswith('.log'):
-                                                    print(f"✅ 解压日志文件：{name}")
-                                                    return zip_ref.read(name).decode('utf-8', errors='ignore')
+                                    # 使用 redirect handler
+                                    class RedirectHandler(urllib.request.HTTPRedirectHandler):
+                                        def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+                                            return urllib.request.Request(newurl, headers=headers)
+                                    
+                                    opener = urllib.request.build_opener(RedirectHandler())
+                                    try:
+                                        with opener.open(download_url, timeout=30) as resp3:
+                                            import zipfile
+                                            import io
+                                            zip_data = io.BytesIO(resp3.read())
+                                            with zipfile.ZipFile(zip_data, 'r') as zip_ref:
+                                                for name in zip_ref.namelist():
+                                                    if name.endswith('.log'):
+                                                        print(f"✅ 解压日志文件：{name}")
+                                                        return zip_ref.read(name).decode('utf-8', errors='ignore')
+                                    except Exception as e3:
+                                        print(f"⚠️ 下载 artifact 失败：{e3}")
     except Exception as e4:
         print(f"⚠️ 获取 artifact 失败：{e4}")
     

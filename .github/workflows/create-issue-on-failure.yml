@@ -1,0 +1,100 @@
+# CI 失败自动创建 Issue
+# 在 Windows 编译失败时直接创建 Issue 并附带错误日志
+
+name: Create Issue on Failure
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-issue:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download build log artifact
+      id: download
+      uses: actions/download-artifact@v4
+      with:
+        name: build-error-log
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        run-id: ${{ github.event.workflow_run.id }}
+      continue-on-error: true
+    
+    - name: Read error log
+      id: read-log
+      if: steps.download.outcome == 'success'
+      run: |
+        if [ -f "build_output.log" ]; then
+          # 读取最后 100 行错误
+          tail -100 build_output.log > error_summary.log
+          echo "has_log=true" >> $GITHUB_OUTPUT
+        else
+          echo "has_log=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create Issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          const runId = context.payload.workflow_run.id;
+          const runUrl = context.payload.workflow_run.html_url;
+          const branch = context.payload.workflow_run.head_branch;
+          const commit = context.payload.workflow_run.head_commit.message;
+          
+          let errorLog = '';
+          try {
+            errorLog = fs.readFileSync('error_summary.log', 'utf8');
+          } catch (e) {
+            errorLog = '无法获取详细错误日志，请查看：' + runUrl;
+          }
+          
+          const title = `[CI 失败] Run #${runId} - Windows 编译错误`;
+          const body = `# CI 失败自动报告
+
+          **Run ID**: #${runId}
+          **分支**: ${branch}
+          **提交**: ${commit}
+          **Run URL**: ${runUrl}
+
+          ---
+
+          ## 📋 编译错误日志
+
+          \`\`\`
+          ${errorLog}
+          \`\`\`
+
+          ---
+
+          ## 🔗 相关链接
+
+          - [查看完整 Run]( ${runUrl} )
+          - [查看 Artifact]( ${runUrl}#artifacts )
+
+          ---
+
+          *此 Issue 由 CI 自动创建*
+          `;
+          
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['bug', 'ci-failure', 'auto-generated']
+          });
+          
+          console.log('✅ Issue created');
