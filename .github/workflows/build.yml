@@ -49,9 +49,36 @@ jobs:
       run: cmake -B build -G "Visual Studio 17 2022" -A x64
       
     - name: Build Release
-      run: cmake --build build --config Release
+      id: build
+      run: |
+        # 捕获编译输出到文件
+        $ErrorActionPreference = "Continue"
+        cmake --build build --config Release 2>&1 | Tee-Object -FilePath build_output.log
+        
+        # 如果编译失败，输出错误日志
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "::group::Build Error Log"
+          Get-Content build_output.log | Select-Object -Last 200
+          Write-Host "::endgroup::"
+          
+          # 设置输出变量
+          $errorLog = Get-Content build_output.log | Select-Object -Last 100 | Out-String
+          echo "error_log=$errorLog" >> $env:GITHUB_OUTPUT
+          
+          exit $LASTEXITCODE
+        }
+      shell: pwsh
+      
+    - name: Upload Build Log (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-error-log
+        path: build_output.log
+        retention-days: 7
       
     - name: Upload Artifact
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: Sample_Triangle
