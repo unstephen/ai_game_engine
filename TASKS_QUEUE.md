@@ -7,18 +7,18 @@
 | 001 | D3D12Device | ✅ 完成 | ✅ 通过 |
 | 002 | D3D12Buffer | ✅ 完成 | ✅ 通过 |
 | 003 | D3D12Texture | ✅ 完成 | ✅ 通过 |
+| 004 | D3D12FrameResourceManager | ✅ 完成 | 待验证 |
+| 005 | D3D12UploadManager | ✅ 完成 | 待验证 |
+| 006 | D3D12CommandList | ✅ 完成 | 待验证 |
 | 007 | D3D12SwapChain | ✅ 完成 | ✅ 通过 |
+| 008 | D3D12DescriptorHeap | ✅ 完成 | 待验证 |
 
 ## 待开发 🔄
 
 | ID | 任务 | 优先级 | 状态 | 分配给 |
 |----|------|--------|------|--------|
-| 004 | D3D12FrameResourceManager | P0 | 待开始 | - |
-| 005 | D3D12UploadManager | P0 | 待开始 | - |
-| 006 | D3D12CommandList | P0 | 待开始 | - |
-| 008 | D3D12DescriptorHeap | P1 | 待开始 | - |
-| 009 | D3D12PipelineState | P1 | 待开始 | - |
-| 010 | Triangle Sample | P0 | 待开始 | - |
+| 009 | D3D12PipelineState | P1 | 部分完成 | - |
+| 010 | Triangle Sample | P0 | 已存在 | 待测试 |
 
 ## 进行中 ⏳
 
@@ -28,4 +28,4 @@
 
 ---
 
-*最后更新：2026-03-17 12:55*
+*最后更新：2026-03-19 02:10*
