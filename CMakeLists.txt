@@ -154,8 +154,8 @@ target_link_libraries(EngineRHI
         EngineWindow
 )
 
-# D3D12 后端
-if(ENGINE_RHI_D3D12)
+# D3D12 后端 (mingw 下跳过，因为缺少 D3D12 库)
+if(ENGINE_RHI_D3D12 AND NOT MINGW)
     add_library(EngineRHID3D12 STATIC
         Source/Runtime/RHI/D3D12/Private/D3D12Device.cpp
         Source/Runtime/RHI/D3D12/Private/D3D12CommandList.cpp
@@ -188,6 +188,14 @@ if(ENGINE_RHI_D3D12)
     target_compile_definitions(EngineRHID3D12
         PRIVATE
             ENGINE_RHI_D3D12_EXPORTS
+    )
+elseif(MINGW)
+    # mingw 下创建空库用于语法检查
+    add_library(EngineRHID3D12 INTERFACE)
+    target_compile_definitions(EngineRHID3D12
+        INTERFACE
+            ENGINE_RHI_D3D12_EXPORTS
+            __MINGW32__
     )
 endif()
 
