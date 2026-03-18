@@ -52,30 +52,106 @@ engine/
 
 ### 前置要求
 
+#### Windows
 - **操作系统**: Windows 10/11 (64-bit)
-- **编译器**: MSVC 2022 (v143+) 或 Clang 15+
+- **编译器**: Visual Studio 2019/2022
 - **CMake**: 3.20+
 - **DirectX 12**: Windows SDK 10.0.19041.0+
 - **Git**: 2.30+
 
+#### Linux
+- **操作系统**: Ubuntu 20.04+ / 其他发行版
+- **编译器**: GCC 10+ 或 Clang 12+
+- **CMake**: 3.20+
+- **Git**: 2.30+
+
+#### macOS
+- **操作系统**: macOS 12+
+- **编译器**: Xcode 14+ (Clang)
+- **CMake**: 3.20+
+- **Git**: 2.30+
+
 ### 构建步骤
+
+#### Windows (推荐方式)
+
+```batch
+# 1. 克隆仓库
+git clone https://github.com/unstephen/ai_game_engine.git
+cd ai_game_engine
+
+# 2. 运行环境设置 (可选，检查依赖)
+Setup.bat
+
+# 3. 生成 Visual Studio 工程
+GenerateProjectFiles.bat
+
+# 4. 构建
+Build.bat -release
+
+# 或者打开 VS 解决方案
+# build\Engine.sln
+```
+
+#### Linux / macOS
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/your-org/engine.git
-cd engine
+git clone https://github.com/unstephen/ai_game_engine.git
+cd ai_game_engine
 
-# 2. 创建构建目录
-mkdir build && cd build
+# 2. 运行环境设置 (可选，检查依赖)
+./Setup.sh
 
-# 3. 配置 CMake
-cmake .. -G "Visual Studio 17 2022" -A x64
+# 3. 生成工程文件
+./GenerateProjectFiles.sh
 
 # 4. 构建
-cmake --build . --config Debug
+./Build.sh -release
 
-# 5. 运行示例
-./Debug/Samples/Triangle.exe
+# 使用 Ninja (更快)
+./GenerateProjectFiles.sh -ninja
+./Build.sh -release
+```
+
+### 构建脚本说明
+
+| 脚本 | 用途 |
+|------|------|
+| `Setup.bat/sh` | 检查并安装依赖 |
+| `GenerateProjectFiles.bat/sh` | 生成 IDE 工程文件 |
+| `Build.bat/sh` | 构建项目 |
+
+#### GenerateProjectFiles 参数
+
+```batch
+# Windows
+GenerateProjectFiles.bat -vs2019      # 使用 VS2019
+GenerateProjectFiles.bat -vs2022      # 使用 VS2022 (默认)
+GenerateProjectFiles.bat -debug       # Debug 配置
+GenerateProjectFiles.bat -clean       # 清理后重新生成
+
+# Linux/macOS
+./GenerateProjectFiles.sh -ninja      # 使用 Ninja
+./GenerateProjectFiles.sh -xcode      # 生成 Xcode 工程 (macOS)
+./GenerateProjectFiles.sh -clean      # 清理后重新生成
+```
+
+#### Build 参数
+
+```batch
+# Windows
+Build.bat -debug       # Debug 构建
+Build.bat -release     # Release 构建 (默认)
+Build.bat -clean       # 清理后构建
+Build.bat -run         # 构建后运行示例
+
+# Linux/macOS
+./Build.sh -debug
+./Build.sh -release
+./Build.sh -clean
+./Build.sh -run
+./Build.sh -j 8        # 指定并行任务数
 ```
 
 ### CMake 选项
