@@ -53,19 +53,24 @@ jobs:
       run: |
         # 捕获编译输出到文件
         $ErrorActionPreference = "Continue"
-        cmake --build build --config Release 2>&1 | Tee-Object -FilePath build_output.log
+        $output = cmake --build build --config Release 2>&1 | Tee-Object -FilePath build_output.log
         
-        # 如果编译失败，输出错误日志
+        # 如果编译失败，输出错误日志并设置输出变量
         if ($LASTEXITCODE -ne 0) {
-          Write-Host "::group::Build Error Log"
-          Get-Content build_output.log | Select-Object -Last 200
+          Write-Host "::group::Build Error Log (Last 100 lines)"
+          Get-Content build_output.log | Select-Object -Last 100
           Write-Host "::endgroup::"
           
-          # 设置输出变量
-          $errorLog = Get-Content build_output.log | Select-Object -Last 100 | Out-String
+          # 设置输出变量（用于后续步骤）
+          $errorLog = Get-Content build_output.log | Select-Object -Last 100 | Out-String -Width 500
+          # 转义特殊字符
+          $errorLog = $errorLog -replace '%', '%25' -replace '`n', '%0A' -replace '`r', '%0D'
           echo "error_log=$errorLog" >> $env:GITHUB_OUTPUT
+          echo "build_failed=true" >> $env:GITHUB_OUTPUT
           
           exit $LASTEXITCODE
+        } else {
+          echo "build_failed=false" >> $env:GITHUB_OUTPUT
         }
       shell: pwsh
       
