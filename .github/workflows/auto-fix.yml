@@ -8,10 +8,11 @@ on:
     workflows: ["CI"]
     types: [completed]
 
-# 需要写入权限来创建 Issue
+# 需要写入权限来创建 Issue 和读取日志
 permissions:
   contents: read
   issues: write
+  actions: read
 
 jobs:
   analyze-failure:
