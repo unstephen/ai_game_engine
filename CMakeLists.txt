@@ -219,6 +219,9 @@ if(ENGINE_BUILD_SAMPLES)
         target_link_libraries(Sample_Triangle
             PRIVATE
                 EngineRHID3D12
+                d3d12
+                dxgi
+                d3dcompiler
         )
         target_compile_definitions(Sample_Triangle
             PRIVATE
