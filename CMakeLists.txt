@@ -154,8 +154,8 @@ target_link_libraries(EngineRHI
         EngineWindow
 )
 
-# D3D12 后端 (mingw 下跳过，因为缺少 D3D12 库)
-if(ENGINE_RHI_D3D12 AND NOT MINGW)
+# D3D12 后端
+if(ENGINE_RHI_D3D12)
     add_library(EngineRHID3D12 STATIC
         Source/Runtime/RHI/D3D12/Private/D3D12Device.cpp
         Source/Runtime/RHI/D3D12/Private/D3D12CommandList.cpp
@@ -176,26 +176,29 @@ if(ENGINE_RHI_D3D12 AND NOT MINGW)
             ${CMAKE_CURRENT_SOURCE_DIR}/Source/Runtime/RHI/Public
     )
 
-    target_link_libraries(EngineRHID3D12
-        PUBLIC
-            EngineRHI
-        PRIVATE
-            d3d12
-            dxgi
-            dxguid
-    )
+    # mingw 下使用 DirectX Headers (如果可用)
+    if(MINGW)
+        # mingw-w64 通常包含基本的 DirectX 头文件
+        # 如果需要完整的 D3D12 支持，可以安装 DirectX-Headers
+        target_link_libraries(EngineRHID3D12
+            PUBLIC
+                EngineRHI
+        )
+    else()
+        # MSVC 下链接完整的 D3D12 库
+        target_link_libraries(EngineRHID3D12
+            PUBLIC
+                EngineRHI
+            PRIVATE
+                d3d12
+                dxgi
+                dxguid
+        )
+    endif()
 
     target_compile_definitions(EngineRHID3D12
         PRIVATE
             ENGINE_RHI_D3D12_EXPORTS
-    )
-elseif(MINGW)
-    # mingw 下创建空库用于语法检查
-    add_library(EngineRHID3D12 INTERFACE)
-    target_compile_definitions(EngineRHID3D12
-        INTERFACE
-            ENGINE_RHI_D3D12_EXPORTS
-            __MINGW32__
     )
 endif()
 

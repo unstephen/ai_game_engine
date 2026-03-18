@@ -20,6 +20,6 @@ add_definitions(-D_WIN32 -DWIN32_LEAN_AND_MEAN -DNOMINMAX)
 # mingw 特定定义（用于条件编译）
 add_definitions(-D__MINGW32__ -D_MINGW)
 
-# 禁用示例项目（需要 D3D12）
-set(ENGINE_BUILD_SAMPLES OFF CACHE BOOL "Disable samples for mingw check" FORCE)
-set(ENGINE_BUILD_TESTS OFF CACHE BOOL "Disable tests for mingw check" FORCE)
+# 注意：示例项目需要 D3D12，mingw 下可能缺少相关库
+# 如果 mingw 安装了 DirectX Headers，可以启用示例
+# set(ENGINE_BUILD_SAMPLES ON CACHE BOOL "Build samples" FORCE)
