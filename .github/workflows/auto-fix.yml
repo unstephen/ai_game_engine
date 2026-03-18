@@ -1,5 +1,5 @@
-# CI 失败自动分析与修复
-# 当 CI 失败时，自动分析日志并创建修复建议/PR
+# CI 失败自动分析与 Issue 创建
+# 当 CI 失败时，自动分析日志并创建 Issue
 
 name: Auto Fix CI
 
@@ -7,6 +7,11 @@ on:
   workflow_run:
     workflows: ["CI"]
     types: [completed]
+
+# 需要写入权限来创建 Issue
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   analyze-failure:
@@ -26,12 +31,3 @@ jobs:
         python3 .github/scripts/analyze_failure.py \
           --run-id ${{ github.event.workflow_run.id }} \
           --token ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Create auto-fix PR
-      if: steps.analyze.outputs.need_fix == 'true'
-      run: |
-        python3 .github/scripts/auto_fix.py \
-          --fix-types "${{ steps.analyze.outputs.fix_types }}" \
-          --token ${{ secrets.GITHUB_TOKEN }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
