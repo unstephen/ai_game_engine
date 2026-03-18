@@ -1,0 +1,44 @@
+# Windows 交叉编译预检查
+# 在 Linux 下使用 mingw-w64 快速验证 Windows 编译
+
+name: Windows Pre-Check
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  mingw-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install mingw-w64
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mingw-w64 cmake
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_TOOLCHAIN_FILE=cmake/mingw-toolchain.cmake \
+          -DCMAKE_BUILD_TYPE=Release
+    
+    - name: Build
+      run: |
+        cmake --build build -j$(nproc)
+    
+    - name: Report Status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ Windows 交叉编译检查通过"
+        else
+          echo "❌ Windows 交叉编译失败，请检查 MSVC 兼容性"
+          exit 1
+        fi

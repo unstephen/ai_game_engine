@@ -1,0 +1,37 @@
+# CI 失败自动分析与修复
+# 当 CI 失败时，自动分析日志并创建修复建议/PR
+
+name: Auto Fix CI
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+jobs:
+  analyze-failure:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.workflow_run.head_branch }}
+    
+    - name: Download and analyze logs
+      id: analyze
+      run: |
+        python3 .github/scripts/analyze_failure.py \
+          --run-id ${{ github.event.workflow_run.id }} \
+          --token ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Create auto-fix PR
+      if: steps.analyze.outputs.need_fix == 'true'
+      run: |
+        python3 .github/scripts/auto_fix.py \
+          --fix-types "${{ steps.analyze.outputs.fix_types }}" \
+          --token ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
