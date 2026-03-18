@@ -4,38 +4,41 @@
 
 #pragma once
 
-// 平台检测 - 必须在任何标准库头文件之前定义
+// 平台检测
 #if defined(_WIN32) || defined(_WIN64)
 #define ENGINE_PLATFORM_WINDOWS 1
+#endif
+
+// 标准库头文件 - 必须在 Windows.h 之前包含
+#include <cstddef>
+#include <cstdint>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <math.h>
+
+// Windows 头文件 (在标准库之后包含)
+#if ENGINE_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-// 先包含标准库头文件，再包含 Windows.h，避免数学函数冲突
-#include <cstddef>
-#include <cstdint>
-#include <cmath>
-#include <cstdlib>
-#include <math.h>
 #include <Windows.h>
-#else
-#include <cstddef>
-#include <cstdint>
-#include <cmath>
-#include <cstdlib>
 #endif
 
+// 其他标准库
 #include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
 
-// 确保数学函数可用 (MSVC 兼容性)
+// MSVC 特定
 #ifdef _MSC_VER
 #include <float.h>
+#include <intrin.h>
 #endif
 
 // 导出宏
