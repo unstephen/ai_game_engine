@@ -13,18 +13,30 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <Windows.h>
-#endif
-
+// 先包含标准库头文件，再包含 Windows.h，避免数学函数冲突
 #include <cstddef>
 #include <cstdint>
 #include <cmath>
 #include <cstdlib>
+#include <math.h>
+#include <Windows.h>
+#else
+#include <cstddef>
+#include <cstdint>
+#include <cmath>
+#include <cstdlib>
+#endif
+
 #include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
+
+// 确保数学函数可用 (MSVC 兼容性)
+#ifdef _MSC_VER
+#include <float.h>
+#endif
 
 // 导出宏
 #ifdef ENGINE_CORE_EXPORTS
