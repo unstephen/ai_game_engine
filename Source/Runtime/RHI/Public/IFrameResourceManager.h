@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <cstdint>
+#include "RHICore.h"
 
 namespace Engine::RHI
 {
@@ -31,7 +31,7 @@ class RHI_API IFrameResourceManager
     virtual uint32_t GetFrameCount() const = 0;
 
     /// 等待帧完成
-    virtual void WaitForFrame(uint32_t frameIndex) = 0;
+    virtual void WaitForFrameCompletion(uint32_t frameIndex) = 0;
 
     /// 获取帧围栏值
     virtual uint64_t GetFrameFenceValue(uint32_t frameIndex) const = 0;

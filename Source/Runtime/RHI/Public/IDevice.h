@@ -13,6 +13,16 @@ namespace Engine::RHI
 class ICommandList;
 class IBuffer;
 class ITexture;
+struct TextureDesc;
+struct ShaderDesc;
+struct RootSignatureDesc;
+struct GraphicsPipelineDesc;
+struct ComputePipelineDesc;
+struct BufferDesc;
+struct DescriptorHeapDesc;
+
+// DescriptorHeapType 在 IDescriptorAllocator.h 中定义，这里只声明
+enum class DescriptorHeapType : uint8_t;
 class IShader;
 class IPipelineState;
 class IRootSignature;
@@ -144,7 +154,7 @@ class RHI_API IDevice
     virtual std::unique_ptr<ICommandList> CreateCommandList() = 0;
 
     /// 提交命令列表
-    virtual void SubmitCommandLists(std::span<ICommandList* const> commandLists) = 0;
+    virtual void SubmitCommandLists(ICommandList* const* commandLists, size_t count) = 0;
 
     // ========== 帧资源管理 ==========
 

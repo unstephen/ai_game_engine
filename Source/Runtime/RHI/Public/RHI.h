@@ -4,6 +4,9 @@
 
 #pragma once
 
+// 先包含 RHICore.h 以获取 Windows API 宏的 #undef 保护
+#include "RHICore.h"
+
 #include "IBuffer.h"
 #include "ICommandList.h"
 #include "IDescriptorAllocator.h"
@@ -17,11 +20,6 @@
 #include "ISwapChain.h"
 #include "ITexture.h"
 #include "IUploadManager.h"
-#include "RHICore.h"
-
-// =============================================================================
-// 命名空间
-// =============================================================================
 
 /**
  * @namespace Engine::RHI

@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
+#include "RHICore.h"
 
 namespace Engine::RHI
 {
@@ -20,10 +19,10 @@ class RHI_API IUploadManager
     virtual ~IUploadManager() = default;
 
     /// 分配上传内存
-    virtual void* Allocate(uint64_t size, uint64_t alignment = 256) = 0;
+    virtual void* EngineAllocate(uint64_t size, uint64_t alignment = 256) = 0;
 
     /// 提交上传
-    virtual void Submit() = 0;
+    virtual void EngineSubmit() = 0;
 
     /// 等待上传完成
     virtual void WaitForCompletion() = 0;
@@ -35,7 +34,7 @@ class RHI_API IUploadManager
     virtual uint64_t GetUsedMemory() const = 0;
 
     /// 重置上传缓冲区
-    virtual void Reset() = 0;
+    virtual void EngineReset() = 0;
 };
 
 } // namespace Engine::RHI

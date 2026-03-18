@@ -25,8 +25,53 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+// mingw 下使用小写 windows.h（Linux 大小写敏感）
+#ifdef __MINGW32__
+#include <windows.h>
+#else
 #include <Windows.h>
 #endif
+
+// =============================================================================
+// 立即 #undef Windows API 宏 - 必须在命名空间内使用函数名之前
+// =============================================================================
+#ifdef CreateWindow
+#undef CreateWindow
+#endif
+#ifdef CreateWindowA
+#undef CreateWindowA
+#endif
+#ifdef CreateWindowW
+#undef CreateWindowW
+#endif
+#ifdef DestroyWindow
+#undef DestroyWindow
+#endif
+#ifdef Reset
+#undef Reset
+#endif
+#ifdef Submit
+#undef Submit
+#endif
+#ifdef Allocate
+#undef Allocate
+#endif
+#ifdef CopyFile
+#undef CopyFile
+#endif
+#ifdef DeleteFile
+#undef DeleteFile
+#endif
+#ifdef MoveFile
+#undef MoveFile
+#endif
+#ifdef GetVersion
+#undef GetVersion
+#endif
+#ifdef Yield
+#undef Yield
+#endif
+#endif  // ENGINE_PLATFORM_WINDOWS
 
 // 其他标准库
 #include <functional>

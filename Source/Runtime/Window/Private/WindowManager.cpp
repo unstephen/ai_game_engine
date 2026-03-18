@@ -4,6 +4,20 @@
 
 #include "WindowManager.h"
 
+// 防止 Windows API 宏污染
+#ifdef CreateWindowA
+#undef CreateWindowA
+#endif
+#ifdef CreateWindowW
+#undef CreateWindowW
+#endif
+#ifdef CreateWindow
+#undef CreateWindow
+#endif
+#ifdef DestroyWindow
+#undef DestroyWindow
+#endif
+
 namespace Engine
 {
 

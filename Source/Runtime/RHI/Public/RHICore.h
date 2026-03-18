@@ -4,28 +4,24 @@
 
 #pragma once
 
-// =============================================================================
-// 平台宏 - 必须在任何标准库头文件之前定义
-// =============================================================================
+// 先包含 Core.h 以获取 Windows API 宏的 #undef 保护
+#include "Core.h"
 
-#if defined(_WIN32) || defined(_WIN64)
+// 平台宏（基于 Core.h 中的定义）
+#if ENGINE_PLATFORM_WINDOWS
 #define RHI_PLATFORM_WINDOWS 1
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
 #endif
 
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <span>
 #include <string_view>
 #include <vector>
+
+// C++20 span - mingw 9.3 不支持，用 gsl::span 或自定义
+// 暂时注释掉，需要时再实现
+// #include <span>
 
 #if defined(__GNUC__) || defined(__clang__)
 #define RHI_COMPILER_GCC 1
@@ -35,13 +31,11 @@
 #define RHI_COMPILER_MSVC 1
 #endif
 
-// DLL 导出/导入
-#if RHI_PLATFORM_WINDOWS
-#ifdef ENGINE_RHI_EXPORTS
+// DLL 导出/导入（仅 MSVC）- mingw/GCC 下为空
+#if defined(_MSC_VER) && defined(ENGINE_RHI_EXPORTS)
 #define RHI_API __declspec(dllexport)
-#else
+#elif defined(_MSC_VER)
 #define RHI_API __declspec(dllimport)
-#endif
 #else
 #define RHI_API
 #endif

@@ -6,6 +6,16 @@
 
 #include "RHICore.h"
 
+// 前向声明
+class IBuffer;
+class ITexture;
+class IPipelineState;
+class IRootSignature;
+
+class ITexture;
+
+#include "RHICore.h"
+
 namespace Engine::RHI
 {
 

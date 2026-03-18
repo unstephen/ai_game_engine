@@ -6,6 +6,9 @@
 
 #include "RHICore.h"
 
+// 前向声明
+class ITexture;
+
 namespace Engine::RHI
 {
 

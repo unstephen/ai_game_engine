@@ -120,14 +120,14 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
     RHI_LOG_INFO("D3D12Device: 开始初始化...");
 
     // 存储配置
-    m_enableDebug      = desc.enableDebug;
-    m_enableValidation = desc.enableValidation;
+    m_debugEnabled      = desc.enableDebug;
+    m_validationEnabled = desc.enableValidation;
 
     HRESULT hr = S_OK;
 
     // ========== 1. 启用调试层 ==========
 
-    if (m_enableDebug)
+    if (m_debugEnabled)
     {
         ComPtr<ID3D12Debug> debugController;
         hr = D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
@@ -143,7 +143,7 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
         }
 
         // 尝试启用 GPU 验证（仅当同时启用验证时）
-        if (m_enableValidation)
+        if (m_validationEnabled)
         {
             ComPtr<ID3D12Debug1> debugController1;
             if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1))))
@@ -157,7 +157,7 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
     // ========== 2. 创建 DXGI 工厂 ==========
 
     UINT dxgiFactoryFlags = 0;
-    if (m_enableDebug)
+    if (m_debugEnabled)
     {
         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
     }
@@ -165,8 +165,8 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
     hr = CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_dxgiFactory));
     if (FAILED(hr))
     {
-        m_lastError = "CreateDXGIFactory2 失败: " + GetHRESULTErrorString(hr);
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "CreateDXGIFactory2 失败: " + GetHRESULTErrorString(hr);
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return HRESULTToRHIResult(hr);
     }
 
@@ -224,8 +224,8 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
 
     if (!selectedAdapter)
     {
-        m_lastError = "未找到支持 D3D12 的适配器";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "未找到支持 D3D12 的适配器";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return RHIResult::NotSupported;
     }
 
@@ -233,18 +233,18 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
     DXGI_ADAPTER_DESC1 selectedDesc;
     selectedAdapter->GetDesc1(&selectedDesc);
 
-    m_deviceName = WideStringToUTF8(selectedDesc.Description);
+    m_adapterName = WideStringToUTF8(selectedDesc.Description);
 
-    RHI_LOG_INFO("D3D12Device: 选择适配器: %s", m_deviceName.c_str());
+    RHI_LOG_INFO("D3D12Device: 选择适配器: %s", m_adapterName.c_str());
 
     // ========== 4. 创建 D3D12 设备 ==========
 
-    hr = D3D12CreateDevice(selectedAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device));
+    hr = D3D12CreateDevice(selectedAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3d12Device));
 
     if (FAILED(hr))
     {
-        m_lastError = "D3D12CreateDevice 失败: " + GetHRESULTErrorString(hr);
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "D3D12CreateDevice 失败: " + GetHRESULTErrorString(hr);
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return HRESULTToRHIResult(hr);
     }
 
@@ -252,9 +252,9 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
 
     // ========== 5. 设置调试信息队列 ==========
 
-    if (m_enableDebug)
+    if (m_debugEnabled)
     {
-        hr = m_device->QueryInterface(IID_PPV_ARGS(&m_infoQueue));
+        hr = m_d3d12Device->QueryInterface(IID_PPV_ARGS(&m_infoQueue));
 
         if (SUCCEEDED(hr))
         {
@@ -286,47 +286,47 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
     queueDesc.Flags                    = D3D12_COMMAND_QUEUE_FLAG_NONE;
     queueDesc.NodeMask                 = 0;
 
-    hr = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue));
+    hr = m_d3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_cmdQueue));
 
     if (FAILED(hr))
     {
-        m_lastError = "CreateCommandQueue 失败: " + GetHRESULTErrorString(hr);
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "CreateCommandQueue 失败: " + GetHRESULTErrorString(hr);
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return HRESULTToRHIResult(hr);
     }
 
     // 设置命令队列名称（用于调试）
-    m_commandQueue->SetName(L"D3D12Device::m_commandQueue");
+    m_cmdQueue->SetName(L"D3D12Device::m_cmdQueue");
 
     RHI_LOG_INFO("D3D12Device: 命令队列创建成功");
 
     // ========== 7. 查询并填充设备信息 ==========
 
-    m_deviceInfo.driverName           = m_deviceName;
-    m_deviceInfo.dedicatedVideoMemory = selectedDesc.DedicatedVideoMemory;
-    m_deviceInfo.sharedVideoMemory    = selectedDesc.SharedSystemMemory;
-    m_deviceInfo.isIntegratedGPU      = (selectedDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) != 0;
+    m_info.driverName           = m_adapterName;
+    m_info.dedicatedVideoMemory = selectedDesc.DedicatedVideoMemory;
+    m_info.sharedVideoMemory    = selectedDesc.SharedSystemMemory;
+    m_info.isIntegratedGPU      = (selectedDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) != 0;
 
     // 查询可选特性支持
     D3D12_FEATURE_DATA_RAYTRACING_TIER raytracingData = {};
     if (SUCCEEDED(
-            m_device->CheckFeatureSupport(D3D12_FEATURE_RAYTRACING_TIER, &raytracingData, sizeof(raytracingData))))
+            m_d3d12Device->CheckFeatureSupport(D3D12_FEATURE_RAYTRACING_TIER, &raytracingData, sizeof(raytracingData))))
     {
-        m_deviceInfo.supportsRayTracing = raytracingData.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0;
+        m_info.supportsRayTracing = raytracingData.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0;
     }
     else
     {
-        m_deviceInfo.supportsRayTracing = false;
+        m_info.supportsRayTracing = false;
     }
 
     D3D12_FEATURE_DATA_MESH_SHADER meshShaderData = {};
-    if (SUCCEEDED(m_device->CheckFeatureSupport(D3D12_FEATURE_MESH_SHADER, &meshShaderData, sizeof(meshShaderData))))
+    if (SUCCEEDED(m_d3d12Device->CheckFeatureSupport(D3D12_FEATURE_MESH_SHADER, &meshShaderData, sizeof(meshShaderData))))
     {
-        m_deviceInfo.supportsMeshShaders = meshShaderData.MeshShaderTier > D3D12_MESH_SHADER_TIER_NOT_SUPPORTED;
+        m_info.supportsMeshShaders = meshShaderData.MeshShaderTier > D3D12_MESH_SHADER_TIER_NOT_SUPPORTED;
     }
     else
     {
-        m_deviceInfo.supportsMeshShaders = false;
+        m_info.supportsMeshShaders = false;
     }
 
     // 尝试获取驱动版本
@@ -343,15 +343,15 @@ RHIResult D3D12Device::Initialize(const DeviceDesc& desc)
     // 格式化驱动版本
     std::ostringstream oss;
     oss << std::hex << selectedDesc.Revision << "." << selectedDesc.BuildNum;
-    m_deviceInfo.driverVersion = oss.str();
+    m_info.driverVersion = oss.str();
 
     RHI_LOG_INFO("D3D12Device: 设备初始化完成");
-    RHI_LOG_INFO("  - 设备名称: %s", m_deviceName.c_str());
-    RHI_LOG_INFO("  - 专用显存: %llu MB", m_deviceInfo.dedicatedVideoMemory / (1024 * 1024));
-    RHI_LOG_INFO("  - 共享显存: %llu MB", m_deviceInfo.sharedVideoMemory / (1024 * 1024));
-    RHI_LOG_INFO("  - 集成 GPU: %s", m_deviceInfo.isIntegratedGPU ? "是" : "否");
-    RHI_LOG_INFO("  - 光线追踪: %s", m_deviceInfo.supportsRayTracing ? "支持" : "不支持");
-    RHI_LOG_INFO("  - 网格着色器: %s", m_deviceInfo.supportsMeshShaders ? "支持" : "不支持");
+    RHI_LOG_INFO("  - 设备名称: %s", m_adapterName.c_str());
+    RHI_LOG_INFO("  - 专用显存: %llu MB", m_info.dedicatedVideoMemory / (1024 * 1024));
+    RHI_LOG_INFO("  - 共享显存: %llu MB", m_info.sharedVideoMemory / (1024 * 1024));
+    RHI_LOG_INFO("  - 集成 GPU: %s", m_info.isIntegratedGPU ? "是" : "否");
+    RHI_LOG_INFO("  - 光线追踪: %s", m_info.supportsRayTracing ? "支持" : "不支持");
+    RHI_LOG_INFO("  - 网格着色器: %s", m_info.supportsMeshShaders ? "支持" : "不支持");
 
     return RHIResult::Success;
 }
@@ -365,11 +365,11 @@ void D3D12Device::Shutdown()
     RHI_LOG_INFO("D3D12Device: 开始关闭...");
 
     // 清理管理器（按照逆初始化顺序）
-    m_uploadManager.reset();
-    m_frameResourceManager.reset();
+    m_uploadMgr.reset();
+    m_frameMgr.reset();
 
     // 清理命令队列
-    m_commandQueue.Reset();
+    m_cmdQueue.Reset();
 
     // 清理调试信息队列
     if (m_infoQueue)
@@ -383,7 +383,7 @@ void D3D12Device::Shutdown()
     }
 
     // 清理设备
-    m_device.Reset();
+    m_d3d12Device.Reset();
 
     // 清理 DXGI 工厂
     m_dxgiFactory.Reset();
@@ -391,8 +391,8 @@ void D3D12Device::Shutdown()
     // 重置状态
     m_isDeviceLost     = false;
     m_deviceLostReason = DeviceLostReason::Unknown;
-    m_lastError.clear();
-    m_deviceName.clear();
+    m_errorMsg.clear();
+    m_adapterName.clear();
 
     RHI_LOG_INFO("D3D12Device: 关闭完成");
 }
@@ -403,12 +403,12 @@ void D3D12Device::Shutdown()
 
 std::string_view D3D12Device::GetDeviceName() const
 {
-    return m_deviceName;
+    return m_adapterName;
 }
 
 DeviceInfo D3D12Device::GetDeviceInfo() const
 {
-    return m_deviceInfo;
+    return m_info;
 }
 
 // =============================================================================
@@ -417,10 +417,10 @@ DeviceInfo D3D12Device::GetDeviceInfo() const
 
 std::unique_ptr<IBuffer> D3D12Device::CreateBuffer(const BufferDesc& desc)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
@@ -430,9 +430,9 @@ std::unique_ptr<IBuffer> D3D12Device::CreateBuffer(const BufferDesc& desc)
 
     if (IsFailure(result))
     {
-        m_lastError = "缓冲区创建失败: ";
-        m_lastError += GetErrorName(result);
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "缓冲区创建失败: ";
+        m_errorMsg += GetErrorName(result);
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
@@ -442,10 +442,10 @@ std::unique_ptr<IBuffer> D3D12Device::CreateBuffer(const BufferDesc& desc)
 
 std::unique_ptr<ITexture> D3D12Device::CreateTexture(const TextureDesc& desc)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
@@ -455,9 +455,9 @@ std::unique_ptr<ITexture> D3D12Device::CreateTexture(const TextureDesc& desc)
 
     if (IsFailure(result))
     {
-        m_lastError = "纹理创建失败: ";
-        m_lastError += GetErrorName(result);
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "纹理创建失败: ";
+        m_errorMsg += GetErrorName(result);
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
@@ -467,78 +467,78 @@ std::unique_ptr<ITexture> D3D12Device::CreateTexture(const TextureDesc& desc)
 
 std::unique_ptr<IShader> D3D12Device::CreateShader(const ShaderDesc& desc)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     // TODO: Task 004 - 实现 D3D12Shader
-    m_lastError = "CreateShader 尚未实现";
-    RHI_LOG_WARNING("D3D12Device: %s", m_lastError.c_str());
+    m_errorMsg = "CreateShader 尚未实现";
+    RHI_LOG_WARNING("D3D12Device: %s", m_errorMsg.c_str());
     return nullptr;
 }
 
 std::unique_ptr<IRootSignature> D3D12Device::CreateRootSignature(const RootSignatureDesc& desc)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     // TODO: Task 005 - 实现 D3D12RootSignature
-    m_lastError = "CreateRootSignature 尚未实现";
-    RHI_LOG_WARNING("D3D12Device: %s", m_lastError.c_str());
+    m_errorMsg = "CreateRootSignature 尚未实现";
+    RHI_LOG_WARNING("D3D12Device: %s", m_errorMsg.c_str());
     return nullptr;
 }
 
 std::unique_ptr<IPipelineState> D3D12Device::CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     // TODO: Task 006 - 实现 D3D12PipelineState
-    m_lastError = "CreateGraphicsPipeline 尚未实现";
-    RHI_LOG_WARNING("D3D12Device: %s", m_lastError.c_str());
+    m_errorMsg = "CreateGraphicsPipeline 尚未实现";
+    RHI_LOG_WARNING("D3D12Device: %s", m_errorMsg.c_str());
     return nullptr;
 }
 
 std::unique_ptr<IPipelineState> D3D12Device::CreateComputePipeline(const ComputePipelineDesc& desc)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     // TODO: Task 006 - 实现 D3D12PipelineState
-    m_lastError = "CreateComputePipeline 尚未实现";
-    RHI_LOG_WARNING("D3D12Device: %s", m_lastError.c_str());
+    m_errorMsg = "CreateComputePipeline 尚未实现";
+    RHI_LOG_WARNING("D3D12Device: %s", m_errorMsg.c_str());
     return nullptr;
 }
 
 std::unique_ptr<ISwapChain> D3D12Device::CreateSwapChain(void* windowHandle, uint32_t width, uint32_t height,
                                                          Format format)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     if (!windowHandle)
     {
-        m_lastError = "窗口句柄为空";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "窗口句柄为空";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
@@ -558,9 +558,9 @@ std::unique_ptr<ISwapChain> D3D12Device::CreateSwapChain(void* windowHandle, uin
 
     if (IsFailure(result))
     {
-        m_lastError = "交换链创建失败: ";
-        m_lastError += GetErrorName(result);
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "交换链创建失败: ";
+        m_errorMsg += GetErrorName(result);
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
@@ -570,22 +570,22 @@ std::unique_ptr<ISwapChain> D3D12Device::CreateSwapChain(void* windowHandle, uin
 
 std::unique_ptr<IDescriptorHeap> D3D12Device::CreateDescriptorHeap(const DescriptorHeapDesc& desc)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     // TODO: Task 008 - 实现 D3D12DescriptorHeap
-    m_lastError = "CreateDescriptorHeap 尚未实现";
-    RHI_LOG_WARNING("D3D12Device: %s", m_lastError.c_str());
+    m_errorMsg = "CreateDescriptorHeap 尚未实现";
+    RHI_LOG_WARNING("D3D12Device: %s", m_errorMsg.c_str());
     return nullptr;
 }
 
 uint32_t D3D12Device::GetDescriptorHandleIncrementSize(DescriptorHeapType type) const
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
         RHI_LOG_ERROR("D3D12Device: 设备未初始化");
         return 0;
@@ -611,21 +611,21 @@ uint32_t D3D12Device::GetDescriptorHandleIncrementSize(DescriptorHeapType type) 
             break;
     }
 
-    return m_device->GetDescriptorHandleIncrementSize(d3dType);
+    return m_d3d12Device->GetDescriptorHandleIncrementSize(d3dType);
 }
 
 std::unique_ptr<IFence> D3D12Device::CreateFence(uint64_t initialValue)
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     // TODO: Task 009 - 实现 D3D12Fence
-    m_lastError = "CreateFence 尚未实现";
-    RHI_LOG_WARNING("D3D12Device: %s", m_lastError.c_str());
+    m_errorMsg = "CreateFence 尚未实现";
+    RHI_LOG_WARNING("D3D12Device: %s", m_errorMsg.c_str());
     return nullptr;
 }
 
@@ -655,16 +655,16 @@ void D3D12Device::SignalFence(IFence* fence, uint64_t value)
 
 std::unique_ptr<ICommandList> D3D12Device::CreateCommandList()
 {
-    if (!m_device)
+    if (!m_d3d12Device)
     {
-        m_lastError = "设备未初始化";
-        RHI_LOG_ERROR("D3D12Device: %s", m_lastError.c_str());
+        m_errorMsg = "设备未初始化";
+        RHI_LOG_ERROR("D3D12Device: %s", m_errorMsg.c_str());
         return nullptr;
     }
 
     // TODO: Task 010 - 实现 D3D12CommandList
-    m_lastError = "CreateCommandList 尚未实现";
-    RHI_LOG_WARNING("D3D12Device: %s", m_lastError.c_str());
+    m_errorMsg = "CreateCommandList 尚未实现";
+    RHI_LOG_WARNING("D3D12Device: %s", m_errorMsg.c_str());
     return nullptr;
 }
 
@@ -675,7 +675,7 @@ void D3D12Device::SubmitCommandLists(std::span<ICommandList* const> commandLists
         return;
     }
 
-    if (!m_commandQueue)
+    if (!m_cmdQueue)
     {
         RHI_LOG_ERROR("D3D12Device: 命令队列未初始化");
         return;
@@ -691,7 +691,7 @@ void D3D12Device::SubmitCommandLists(std::span<ICommandList* const> commandLists
 
 void D3D12Device::SetDeviceLostCallback(DeviceLostCallback callback)
 {
-    m_deviceLostCallback = callback;
+    m_lostCallback = callback;
 }
 
 RHIResult D3D12Device::TryRecover()
@@ -704,15 +704,15 @@ RHIResult D3D12Device::TryRecover()
     RHI_LOG_WARNING("D3D12Device: 尝试恢复设备...");
 
     // 检查设备状态
-    if (m_device)
+    if (m_d3d12Device)
     {
-        HRESULT hr = m_device->GetDeviceRemovedReason();
+        HRESULT hr = m_d3d12Device->GetDeviceRemovedReason();
         if (hr == S_OK)
         {
             // 设备已恢复正常
             m_isDeviceLost     = false;
             m_deviceLostReason = DeviceLostReason::Unknown;
-            m_lastError.clear();
+            m_errorMsg.clear();
             RHI_LOG_INFO("D3D12Device: 设备已恢复");
             return RHIResult::Success;
         }
@@ -731,31 +731,31 @@ void D3D12Device::OnDeviceLost(DeviceLostReason reason, const char* message)
 {
     m_isDeviceLost     = true;
     m_deviceLostReason = reason;
-    m_lastError        = message ? message : "设备丢失";
+    m_errorMsg        = message ? message : "设备丢失";
 
-    RHI_LOG_ERROR("D3D12Device: 设备丢失 - %s", m_lastError.c_str());
+    RHI_LOG_ERROR("D3D12Device: 设备丢失 - %s", m_errorMsg.c_str());
 
     // 调试模式下触发断点
-    if (m_enableDebug)
+    if (m_debugEnabled)
     {
         RHI_DEBUG_BREAK();
     }
 
     // 调用用户回调
-    if (m_deviceLostCallback)
+    if (m_lostCallback)
     {
-        m_deviceLostCallback(reason, m_lastError.c_str());
+        m_lostCallback(reason, m_errorMsg.c_str());
     }
 }
 
 void D3D12Device::CheckDeviceStatus()
 {
-    if (!m_device || m_isDeviceLost)
+    if (!m_d3d12Device || m_isDeviceLost)
     {
         return;
     }
 
-    HRESULT hr = m_device->GetDeviceRemovedReason();
+    HRESULT hr = m_d3d12Device->GetDeviceRemovedReason();
     if (hr != S_OK)
     {
         DeviceLostReason reason = DeviceLostReason::Unknown;

@@ -199,6 +199,7 @@ if(ENGINE_RHI_D3D12)
     target_compile_definitions(EngineRHID3D12
         PRIVATE
             ENGINE_RHI_D3D12_EXPORTS
+            ENGINE_RHI_D3D12=1
     )
 endif()
 

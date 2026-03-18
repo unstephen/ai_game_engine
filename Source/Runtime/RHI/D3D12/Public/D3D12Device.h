@@ -67,54 +67,54 @@ class D3D12Device : public IDevice
 
     // 命令列表
     virtual std::unique_ptr<ICommandList> CreateCommandList() override;
-    virtual void                          SubmitCommandLists(std::span<ICommandList* const> commandLists) override;
+    virtual void                          SubmitCommandLists(ICommandList* const* commandLists, size_t count) override;
 
     // 帧资源管理
-    virtual IFrameResourceManager* GetFrameResourceManager() override { return m_frameResourceManager.get(); }
-    virtual IUploadManager*        GetUploadManager() override { return m_uploadManager.get(); }
+    virtual IFrameResourceManager* GetFrameResourceManager() override { return m_frameMgr.get(); }
+    virtual IUploadManager*        GetUploadManager() override { return m_uploadMgr.get(); }
 
     // 错误处理
     virtual void             SetDeviceLostCallback(DeviceLostCallback callback) override;
     virtual bool             IsDeviceLost() const override { return m_isDeviceLost; }
     virtual DeviceLostReason GetDeviceLostReason() const override { return m_deviceLostReason; }
     virtual RHIResult        TryRecover() override;
-    virtual const char*      GetLastError() const override { return m_lastError.c_str(); }
+    virtual const char*      GetLastError() const override { return m_errorMsg.c_str(); }
 
     // ========== D3D12 特定接口 ==========
 
     /// 获取 D3D12 设备
-    ID3D12Device* GetD3D12Device() const { return m_device.Get(); }
+    ID3D12Device* GetD3D12Device() const { return m_d3d12Device.Get(); }
 
     /// 获取命令队列
-    ID3D12CommandQueue* GetCommandQueue() const { return m_commandQueue.Get(); }
+    ID3D12CommandQueue* GetCommandQueue() const { return m_cmdQueue.Get(); }
 
     /// 获取 DXGI 工厂
     IDXGIFactory4* GetDXGIFactory() const { return m_dxgiFactory.Get(); }
 
   private:
-    // D3D12 核心对象
-    ComPtr<ID3D12Device>       m_device;
-    ComPtr<ID3D12CommandQueue> m_commandQueue;
+    // D3D12 核心对象（添加前缀避免与 Windows API 宏冲突）
+    ComPtr<ID3D12Device>       m_d3d12Device;
+    ComPtr<ID3D12CommandQueue> m_cmdQueue;
     ComPtr<IDXGIFactory4>      m_dxgiFactory;
     ComPtr<ID3D12InfoQueue>    m_infoQueue; // 调试信息队列
 
     // 管理器
-    std::unique_ptr<IFrameResourceManager> m_frameResourceManager;
-    std::unique_ptr<IUploadManager>        m_uploadManager;
+    std::unique_ptr<IFrameResourceManager> m_frameMgr;
+    std::unique_ptr<IUploadManager>        m_uploadMgr;
 
     // 设备状态
     bool             m_isDeviceLost     = false;
     DeviceLostReason m_deviceLostReason = DeviceLostReason::Unknown;
-    std::string      m_lastError;
-    std::string      m_deviceName;
-    DeviceInfo       m_deviceInfo;
+    std::string      m_errorMsg;
+    std::string      m_adapterName;
+    DeviceInfo       m_info;
 
     // 回调
-    DeviceLostCallback m_deviceLostCallback = nullptr;
+    DeviceLostCallback m_lostCallback = nullptr;
 
     // 调试
-    bool m_enableDebug      = false;
-    bool m_enableValidation = false;
+    bool m_debugEnabled   = false;
+    bool m_validationEnabled = false;
 };
 
 } // namespace Engine::RHI::D3D12
