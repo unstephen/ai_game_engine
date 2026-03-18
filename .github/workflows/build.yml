@@ -8,33 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ========== 快速检查 (5 分钟内出结果) ==========
+  # ========== Linux 语法检查 ==========
   
-  # mingw 交叉编译检查 - 提前发现 Windows 问题
-  mingw-check:
-    runs-on: ubuntu-latest
-    name: Windows 交叉编译检查
-    timeout-minutes: 10
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Install mingw-w64
-      run: |
-        sudo apt update
-        sudo apt install -y mingw-w64 cmake
-      
-    - name: Configure CMake
-      run: |
-        cmake -B build \
-          -DCMAKE_TOOLCHAIN_FILE=cmake/mingw-toolchain.cmake \
-          -DCMAKE_BUILD_TYPE=Release
-      
-    - name: Build
-      run: cmake --build build -j$(nproc)
-
-  # Linux 语法检查
   lint-linux:
     runs-on: ubuntu-latest
     name: Linux 语法检查
@@ -57,13 +32,14 @@ jobs:
                  --error-exitcode=1 \
                  Source/
 
-  # ========== 完整检查 (Windows 真实环境) ==========
+  # ========== Windows 真实编译 ==========
+  # 注意：暂时跳过 mingw 预检查，直接跑 Windows 编译
+  # mingw 用于本地快速验证，不用于 CI
   
-  # Windows 编译 - 在 mingw 和 lint 都通过后才运行
   build-windows:
     runs-on: windows-latest
     name: Windows 编译
-    needs: [mingw-check, lint-linux]  # 两个检查都通过后才编译
+    needs: lint-linux  # 语法检查通过后才编译
     
     steps:
     - name: Checkout code
