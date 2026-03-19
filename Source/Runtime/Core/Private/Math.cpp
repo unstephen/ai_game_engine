@@ -3,14 +3,28 @@
 // =============================================================================
 
 #include "Math.h"
+
+// MSVC 下使用 math.h，其他平台使用 cmath
+#ifdef _MSC_VER
+#include <math.h>
+#define SIN(x) sinf(x)
+#define COS(x) cosf(x)
+#define TAN(x) tanf(x)
+#define SQRT(x) sqrtf(x)
+#else
 #include <cmath>
+#define SIN(x) std::sin(x)
+#define COS(x) std::cos(x)
+#define TAN(x) std::tan(x)
+#define SQRT(x) std::sqrt(x)
+#endif
 
 namespace Engine
 {
 
 float Vector3::Length() const
 {
-    return std::sqrt(x * x + y * y + z * z);
+    return SQRT(x * x + y * y + z * z);
 }
 
 Vector3 Vector3::Normalized() const
@@ -25,8 +39,8 @@ Vector3 Vector3::Normalized() const
 
 Matrix4x4 Matrix4x4::RotationX(float angle)
 {
-    float     c = std::cos(angle);
-    float     s = std::sin(angle);
+    float     c = COS(angle);
+    float     s = SIN(angle);
     Matrix4x4 result;
     result.m[1][1] = c;
     result.m[1][2] = s;
@@ -37,8 +51,8 @@ Matrix4x4 Matrix4x4::RotationX(float angle)
 
 Matrix4x4 Matrix4x4::RotationY(float angle)
 {
-    float     c = std::cos(angle);
-    float     s = std::sin(angle);
+    float     c = COS(angle);
+    float     s = SIN(angle);
     Matrix4x4 result;
     result.m[0][0] = c;
     result.m[0][2] = -s;
@@ -49,8 +63,8 @@ Matrix4x4 Matrix4x4::RotationY(float angle)
 
 Matrix4x4 Matrix4x4::RotationZ(float angle)
 {
-    float     c = std::cos(angle);
-    float     s = std::sin(angle);
+    float     c = COS(angle);
+    float     s = SIN(angle);
     Matrix4x4 result;
     result.m[0][0] = c;
     result.m[0][1] = s;
@@ -61,7 +75,7 @@ Matrix4x4 Matrix4x4::RotationZ(float angle)
 
 Matrix4x4 Matrix4x4::Perspective(float fov, float aspect, float nearZ, float farZ)
 {
-    float     tanHalfFov = std::tan(fov * 0.5f);
+    float     tanHalfFov = TAN(fov * 0.5f);
     Matrix4x4 result;
     result.m[0][0] = 1.0f / (aspect * tanHalfFov);
     result.m[1][1] = 1.0f / tanHalfFov;
