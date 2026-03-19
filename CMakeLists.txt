@@ -50,14 +50,16 @@ endif()
 
 # MSVC 特定设置
 if(MSVC)
-    # 解决 MSVC cmath 兼容性问题
+    # 解决 MSVC cmath/cstdlib 兼容性问题
     add_compile_definitions(
         _CRT_NONSTDC_NO_WARNINGS
         _CRT_SECURE_NO_WARNINGS
         _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
     )
-    # 使用传统预处理器避免某些兼容性问题
-    add_compile_options(/Zc:preprocessor-)
+    # 使用严格标准一致性
+    add_compile_options(/permissive-)
+    # 正确报告 C++ 版本
+    add_compile_options(/Zc:__cplusplus)
 endif()
 
 # 调试层
