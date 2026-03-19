@@ -9,8 +9,8 @@ namespace Engine
 
 Matrix4x4 Matrix4x4::RotationX(float angle)
 {
-    float     c = std::cos(angle);
-    float     s = std::sin(angle);
+    float     c = cosf(angle);
+    float     s = sinf(angle);
     Matrix4x4 result;
     result.m[1][1] = c;
     result.m[1][2] = s;
@@ -21,8 +21,8 @@ Matrix4x4 Matrix4x4::RotationX(float angle)
 
 Matrix4x4 Matrix4x4::RotationY(float angle)
 {
-    float     c = std::cos(angle);
-    float     s = std::sin(angle);
+    float     c = cosf(angle);
+    float     s = sinf(angle);
     Matrix4x4 result;
     result.m[0][0] = c;
     result.m[0][2] = -s;
@@ -33,8 +33,8 @@ Matrix4x4 Matrix4x4::RotationY(float angle)
 
 Matrix4x4 Matrix4x4::RotationZ(float angle)
 {
-    float     c = std::cos(angle);
-    float     s = std::sin(angle);
+    float     c = cosf(angle);
+    float     s = sinf(angle);
     Matrix4x4 result;
     result.m[0][0] = c;
     result.m[0][1] = s;
@@ -45,7 +45,7 @@ Matrix4x4 Matrix4x4::RotationZ(float angle)
 
 Matrix4x4 Matrix4x4::Perspective(float fov, float aspect, float nearZ, float farZ)
 {
-    float     tanHalfFov = std::tan(fov * 0.5f);
+    float     tanHalfFov = tanf(fov * 0.5f);
     Matrix4x4 result;
     result.m[0][0] = 1.0f / (aspect * tanHalfFov);
     result.m[1][1] = 1.0f / tanHalfFov;
