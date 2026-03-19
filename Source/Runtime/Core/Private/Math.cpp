@@ -7,6 +7,21 @@
 namespace Engine
 {
 
+float Vector3::Length() const
+{
+    return sqrtf(x * x + y * y + z * z);
+}
+
+Vector3 Vector3::Normalized() const
+{
+    float len = Length();
+    if (len > 0.0f)
+    {
+        return {x / len, y / len, z / len};
+    }
+    return {};
+}
+
 Matrix4x4 Matrix4x4::RotationX(float angle)
 {
     float     c = cosf(angle);

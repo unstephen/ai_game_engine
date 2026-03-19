@@ -11,14 +11,7 @@
 #ifdef _MSC_VER
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-// MSVC cmath 兼容性：强制使用 C 数学函数
-#define _CMATH_
 #endif
-#endif
-
-// MSVC 下使用 math.h 而不是 cmath（解决 cmath 兼容性问题）
-#ifdef _MSC_VER
-#include <math.h>
 #endif
 
 // 标准库头文件
@@ -26,9 +19,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#ifndef _MSC_VER
-#include <cmath>
-#endif
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS

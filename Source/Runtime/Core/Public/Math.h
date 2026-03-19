@@ -6,7 +6,8 @@
 
 #include "Core.h"
 
-// MSVC 下使用 math.h 而不是 cmath（解决 MSVC cmath 兼容性问题）
+// MSVC 下使用 C 标准库 math.h，避免 cmath 兼容性问题
+// 其他平台使用标准 cmath
 #ifdef _MSC_VER
 #include <math.h>
 #else
@@ -55,18 +56,10 @@ struct Vector3
     Vector3 operator-(const Vector3& rhs) const { return {x - rhs.x, y - rhs.y, z - rhs.z}; }
     Vector3 operator*(float s) const { return {x * s, y * s, z * s}; }
 
-    float Length() const { return sqrtf(x * x + y * y + z * z); }
+    float Length() const;
     float LengthSq() const { return x * x + y * y + z * z; }
 
-    Vector3 Normalized() const
-    {
-        float len = Length();
-        if (len > 0.0f)
-        {
-            return {x / len, y / len, z / len};
-        }
-        return {};
-    }
+    Vector3 Normalized() const;
 
     static Vector3 Cross(const Vector3& a, const Vector3& b)
     {
