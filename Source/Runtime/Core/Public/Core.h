@@ -16,7 +16,7 @@
 #endif
 #endif
 
-// 标准库头文件
+// 标准库头文件 - 不包含可能间接包含 <cmath> 的头文件
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -77,13 +77,6 @@
 #undef Yield
 #endif
 #endif  // ENGINE_PLATFORM_WINDOWS
-
-// 其他标准库
-#include <functional>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <vector>
 
 // MSVC 特定
 #ifdef _MSC_VER
