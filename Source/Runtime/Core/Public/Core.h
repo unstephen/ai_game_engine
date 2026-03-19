@@ -11,6 +11,8 @@
 #ifdef _MSC_VER
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+// MSVC: 必须在所有其他标准库之前包含 math.h
+#include <math.h>
 #endif
 #endif
 

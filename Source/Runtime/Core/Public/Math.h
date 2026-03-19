@@ -6,14 +6,6 @@
 
 #include "Core.h"
 
-// MSVC 下使用 C 标准库 math.h，避免 cmath 兼容性问题
-// 其他平台使用标准 cmath
-#ifdef _MSC_VER
-#include <math.h>
-#else
-#include <cmath>
-#endif
-
 namespace Engine
 {
 
