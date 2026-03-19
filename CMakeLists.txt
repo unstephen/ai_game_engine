@@ -55,6 +55,7 @@ if(MSVC)
         _CRT_NONSTDC_NO_WARNINGS
         _CRT_SECURE_NO_WARNINGS
         _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+        _HAS_STDIO_DEFINITIONS
     )
     # 使用严格标准一致性
     add_compile_options(/permissive-)
