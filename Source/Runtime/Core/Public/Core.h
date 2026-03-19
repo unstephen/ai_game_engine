@@ -14,6 +14,12 @@
 #endif
 #endif
 
+// MSVC: math.h 必须在任何标准库头文件之前包含
+// 因为 <cstdlib> 需要 fabs 等函数
+#ifdef _MSC_VER
+#include <math.h>
+#endif
+
 // 标准库头文件 - 必须在 Windows.h 之前包含
 #include <cstddef>
 #include <cstdint>
