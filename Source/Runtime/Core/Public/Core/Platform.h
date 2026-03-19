@@ -28,60 +28,28 @@
         #define _USE_MATH_DEFINES
     #endif
 
-    // 如果仍然找不到 sinf/cosf/sqrtf，手动映射到 std:: 版本
+    // 提供全局命名空间的 float 版本数学函数
+    // DirectXMath 和其他库使用 sinf/cosf/sqrtf 等 POSIX 命名
     #include <cmath>
-    
-    #ifndef sinf
-        #define sinf(x) std::sin(x)
-    #endif
-    #ifndef cosf
-        #define cosf(x) std::cos(x)
-    #endif
-    #ifndef sqrtf
-        #define sqrtf(x) std::sqrt(x)
-    #endif
-    #ifndef tanf
-        #define tanf(x) std::tan(x)
-    #endif
-    #ifndef asinf
-        #define asinf(x) std::asin(x)
-    #endif
-    #ifndef acosf
-        #define acosf(x) std::acos(x)
-    #endif
-    #ifndef atanf
-        #define atanf(x) std::atan(x)
-    #endif
-    #ifndef atan2f
-        #define atan2f(y, x) std::atan2(y, x)
-    #endif
-    #ifndef powf
-        #define powf(base, exp) std::pow(base, exp)
-    #endif
-    #ifndef expf
-        #define expf(x) std::exp(x)
-    #endif
-    #ifndef logf
-        #define logf(x) std::log(x)
-    #endif
-    #ifndef log10f
-        #define log10f(x) std::log10(x)
-    #endif
-    #ifndef fabsf
-        #define fabsf(x) std::fabs(x)
-    #endif
-    #ifndef floorf
-        #define floorf(x) std::floor(x)
-    #endif
-    #ifndef ceilf
-        #define ceilf(x) std::ceil(x)
-    #endif
-    #ifndef roundf
-        #define roundf(x) std::round(x)
-    #endif
-    #ifndef fmodf
-        #define fmodf(x, y) std::fmod(x, y)
-    #endif
+
+    // 使用 inline 函数而非宏，更安全且支持重载
+    inline float sinf(float x) { return std::sin(x); }
+    inline float cosf(float x) { return std::cos(x); }
+    inline float tanf(float x) { return std::tan(x); }
+    inline float sqrtf(float x) { return std::sqrt(x); }
+    inline float asinf(float x) { return std::asin(x); }
+    inline float acosf(float x) { return std::acos(x); }
+    inline float atanf(float x) { return std::atan(x); }
+    inline float atan2f(float y, float x) { return std::atan2(y, x); }
+    inline float powf(float base, float exp) { return std::pow(base, exp); }
+    inline float expf(float x) { return std::exp(x); }
+    inline float logf(float x) { return std::log(x); }
+    inline float log10f(float x) { return std::log10(x); }
+    inline float fabsf(float x) { return std::fabs(x); }
+    inline float floorf(float x) { return std::floor(x); }
+    inline float ceilf(float x) { return std::ceil(x); }
+    inline float roundf(float x) { return std::round(x); }
+    inline float fmodf(float x, float y) { return std::fmod(x, y); }
 
 #endif // _MSC_VER
 

@@ -67,8 +67,8 @@ if(MSVC)
     add_compile_options(/Zc:wchar_t /Zc:inline)
     
     # 强制包含 Platform.h 在所有编译单元之前
-    # 这样 sinf/cosf/sqrtf 宏定义会全局生效
-    add_compile_options(/FI"${CMAKE_CURRENT_SOURCE_DIR}/Source/Runtime/Core/Public/Core/Platform.h")
+    # 这样 sinf/cosf/sqrtf 函数定义会全局生效
+    add_compile_options("/FI\"Source/Runtime/Core/Public/Core/Platform.h\"")
 endif()
 
 # 调试层
