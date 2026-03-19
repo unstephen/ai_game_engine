@@ -65,6 +65,10 @@ if(MSVC)
     add_compile_options(/Zc:__cplusplus)
     # 标准库行为一致
     add_compile_options(/Zc:wchar_t /Zc:inline)
+    
+    # 强制包含 Platform.h 在所有编译单元之前
+    # 这样 sinf/cosf/sqrtf 宏定义会全局生效
+    add_compile_options(/FI"${CMAKE_CURRENT_SOURCE_DIR}/Source/Runtime/Core/Public/Core/Platform.h")
 endif()
 
 # 调试层
@@ -90,8 +94,8 @@ endif()
 # 查找依赖
 # =============================================================================
 
-# GLM 数学库 (Header-only)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm)
+# DirectXMath 数学库 (Header-only)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DirectXMath/Inc)
 
 # DirectX 12
 if(ENGINE_RHI_D3D12)

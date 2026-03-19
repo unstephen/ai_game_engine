@@ -1,36 +1,27 @@
 // =============================================================================
-// Math.h - 数学库（基于 GLM）
+// Math.h - 数学库（基于 DirectXMath）
 // ============================================================================
 
 #pragma once
 
 #include "Core.h"
 
-// GLM 配置 - 必须在包含 GLM 之前定义
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_LEFT_HANDED
-#define GLM_ENABLE_EXPERIMENTAL
-
-// MSVC 兼容性：在 GLM 之前包含 C 标准库头文件
-#ifdef _MSC_VER
-#include <math.h>
-#include <cstdlib>
-#endif
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
+// DirectXMath - 微软官方数学库，跨平台支持
+#include <DirectXMath.h>
+#include <DirectXPackedVector.h>
 
 namespace Engine
 {
 
-// 导入 GLM 类型
-using Vector2 = glm::vec2;
-using Vector3 = glm::vec3;
-using Vector4 = glm::vec4;
-using Matrix4x4 = glm::mat4;
-using Quaternion = glm::quat;
+// 导入 DirectXMath 命名空间
+using namespace DirectX;
+
+// 类型别名
+using Vector2 = XMFLOAT2;
+using Vector3 = XMFLOAT3;
+using Vector4 = XMFLOAT4;
+using Matrix4x4 = XMFLOAT4X4;
+using Quaternion = XMFLOAT4;
 
 // 常量
 constexpr float PI = 3.14159265358979323846f;
@@ -38,42 +29,117 @@ constexpr float DEG_TO_RAD = PI / 180.0f;
 constexpr float RAD_TO_DEG = 180.0f / PI;
 
 // ============================================================================
-// 数学工具函数
+// 向量运算辅助函数
 // ============================================================================
+
+inline XMVECTOR Load(const Vector3& v) { return XMLoadFloat3(&v); }
+inline void Store(Vector3& out, FXMVECTOR v) { XMStoreFloat3(&out, v); }
+
+inline float Length(const Vector3& v)
+{
+    XMVECTOR vec = XMLoadFloat3(&v);
+    return XMVectorGetX(XMVector3Length(vec));
+}
+
+inline Vector3 Normalize(const Vector3& v)
+{
+    XMVECTOR vec = XMLoadFloat3(&v);
+    XMVECTOR normalized = XMVector3Normalize(vec);
+    Vector3 result;
+    XMStoreFloat3(&result, normalized);
+    return result;
+}
+
+inline Vector3 Cross(const Vector3& a, const Vector3& b)
+{
+    XMVECTOR va = XMLoadFloat3(&a);
+    XMVECTOR vb = XMLoadFloat3(&b);
+    XMVECTOR cross = XMVector3Cross(va, vb);
+    Vector3 result;
+    XMStoreFloat3(&result, cross);
+    return result;
+}
+
+inline float Dot(const Vector3& a, const Vector3& b)
+{
+    XMVECTOR va = XMLoadFloat3(&a);
+    XMVECTOR vb = XMLoadFloat3(&b);
+    return XMVectorGetX(XMVector3Dot(va, vb));
+}
+
+// ============================================================================
+// 矩阵运算辅助函数
+// ============================================================================
+
+inline XMMATRIX Load(const Matrix4x4& m) { return XMLoadFloat4x4(&m); }
+inline void Store(Matrix4x4& out, FXMMATRIX m) { XMStoreFloat4x4(&out, m); }
+
+inline Matrix4x4 IdentityMatrix()
+{
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixIdentity());
+    return result;
+}
 
 inline Matrix4x4 CreatePerspectiveMatrix(float fov, float aspect, float nearZ, float farZ)
 {
-    return glm::perspectiveLH_ZO(fov, aspect, nearZ, farZ);
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixPerspectiveFovLH(fov, aspect, nearZ, farZ));
+    return result;
 }
 
 inline Matrix4x4 CreateLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up)
 {
-    return glm::lookAtLH(eye, target, up);
+    XMVECTOR eyeVec = XMLoadFloat3(&eye);
+    XMVECTOR targetVec = XMLoadFloat3(&target);
+    XMVECTOR upVec = XMLoadFloat3(&up);
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixLookAtLH(eyeVec, targetVec, upVec));
+    return result;
 }
 
 inline Matrix4x4 CreateTranslationMatrix(const Vector3& translation)
 {
-    return glm::translate(glm::mat4(1.0f), translation);
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixTranslation(translation.x, translation.y, translation.z));
+    return result;
 }
 
 inline Matrix4x4 CreateScaleMatrix(const Vector3& scale)
 {
-    return glm::scale(glm::mat4(1.0f), scale);
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixScaling(scale.x, scale.y, scale.z));
+    return result;
 }
 
 inline Matrix4x4 CreateRotationMatrixX(float angle)
 {
-    return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1, 0, 0));
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixRotationX(angle));
+    return result;
 }
 
 inline Matrix4x4 CreateRotationMatrixY(float angle)
 {
-    return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 1, 0));
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixRotationY(angle));
+    return result;
 }
 
 inline Matrix4x4 CreateRotationMatrixZ(float angle)
 {
-    return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 0, 1));
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, XMMatrixRotationZ(angle));
+    return result;
+}
+
+inline Matrix4x4 Multiply(const Matrix4x4& a, const Matrix4x4& b)
+{
+    XMMATRIX ma = XMLoadFloat4x4(&a);
+    XMMATRIX mb = XMLoadFloat4x4(&b);
+    Matrix4x4 result;
+    XMStoreFloat4x4(&result, ma * mb);
+    return result;
 }
 
 } // namespace Engine
