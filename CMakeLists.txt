@@ -48,6 +48,18 @@ if(WIN32)
     add_definitions(-DNOMINMAX)
 endif()
 
+# MSVC 特定设置
+if(MSVC)
+    # 解决 MSVC cmath 兼容性问题
+    add_compile_definitions(
+        _CRT_NONSTDC_NO_WARNINGS
+        _CRT_SECURE_NO_WARNINGS
+        _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+    )
+    # 使用传统预处理器避免某些兼容性问题
+    add_compile_options(/Zc:preprocessor-)
+endif()
+
 # 调试层
 if(ENGINE_DEBUG_LAYER)
     add_definitions(-DRHI_DEBUG)

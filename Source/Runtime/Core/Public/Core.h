@@ -11,22 +11,17 @@
 #ifdef _MSC_VER
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+// 启用 C99 数学函数名 (sinf, cosf, etc.)
+#define _CRT_DECLARE_NONSTDC_NAMES 1
 #endif
 #endif
 
-// 标准库头文件 - math.h 在 MSVC 下必须最先包含
-#ifdef _MSC_VER
-#include <math.h>
-#endif
+// 标准库头文件
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-
-// 非 MSVC 平台使用 cmath
-#ifndef _MSC_VER
 #include <cmath>
-#endif
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS
