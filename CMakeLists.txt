@@ -55,15 +55,13 @@ if(MSVC)
         _CRT_NONSTDC_NO_WARNINGS
         _CRT_SECURE_NO_WARNINGS
         _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-        _HAS_STDIO_DEFINITIONS
         _USE_MATH_DEFINES
     )
-    # 使用严格标准一致性
-    add_compile_options(/permissive-)
+    # 注意：不使用 /permissive- 以避免 <cmath> 兼容性问题
     # 正确报告 C++ 版本
     add_compile_options(/Zc:__cplusplus)
-    # 确保标准库行为一致
-    add_compile_options(/Zc:wchar_t /Zc:inline)
+    # 标准库行为一致
+    add_compile_options(/Zc:wchar_t /Zc:inline /Zc:throwingNew)
 endif()
 
 # 调试层
