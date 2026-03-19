@@ -88,6 +88,14 @@ endif()
 # =============================================================================
 
 # GLM 数学库 (Header-only)
+# 配置 GLM 以解决 MSVC 兼容性问题
+if(MSVC)
+    add_compile_definitions(
+        GLM_FORCE_CTOR_INIT
+        GLM_FORCE_DEPTH_ZERO_TO_ONE
+        GLM_FORCE_LEFT_HANDED
+    )
+endif()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm)
 
 # DirectX 12
