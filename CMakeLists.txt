@@ -57,11 +57,14 @@ if(MSVC)
         _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
         _USE_MATH_DEFINES
     )
-    # 注意：不使用 /permissive- 以避免 <cmath> 兼容性问题
+    # 使用静态运行时库
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    # C++20 标准
+    add_compile_options(/std:c++20)
     # 正确报告 C++ 版本
     add_compile_options(/Zc:__cplusplus)
     # 标准库行为一致
-    add_compile_options(/Zc:wchar_t /Zc:inline /Zc:throwingNew)
+    add_compile_options(/Zc:wchar_t /Zc:inline)
 endif()
 
 # 调试层
