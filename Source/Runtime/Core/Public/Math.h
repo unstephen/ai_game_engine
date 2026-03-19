@@ -1,21 +1,21 @@
 // =============================================================================
 // Math.h - 数学库（基于 GLM）
-// =============================================================================
+// ============================================================================
 
 #pragma once
 
 #include "Core.h"
+
+// GLM 配置 - 必须在包含 GLM 之前定义
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_LEFT_HANDED
+#define GLM_ENABLE_EXPERIMENTAL
 
 // MSVC 兼容性：在 GLM 之前包含 C 标准库头文件
 #ifdef _MSC_VER
 #include <math.h>
 #include <cstdlib>
 #endif
-
-// GLM 配置
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_LEFT_HANDED
-#define GLM_ENABLE_EXPERIMENTAL
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
