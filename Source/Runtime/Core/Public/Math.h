@@ -6,31 +6,14 @@
 
 #include "Core.h"
 
+#ifdef _MSC_VER
+// MSVC: 先包含 math.h，避免 cmath 问题
+#include <math.h>
+#endif
+
 #include <algorithm>
 
-// MSVC 下使用 math.h 而不是 cmath（解决 cmath 兼容性问题）
-#ifdef _MSC_VER
-#include <math.h>
-// 提供 std:: 命名空间别名
-namespace std {
-    using ::cosf;
-    using ::sinf;
-    using ::tanf;
-    using ::sqrtf;
-    using ::acosf;
-    using ::asinf;
-    using ::atanf;
-    using ::atan2f;
-    using ::fabsf;
-    using ::floorf;
-    using ::ceilf;
-    using ::fmodf;
-    using ::powf;
-    using ::expf;
-    using ::logf;
-    using ::log10f;
-}
-#else
+#ifndef _MSC_VER
 #include <cmath>
 #endif
 
