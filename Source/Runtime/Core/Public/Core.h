@@ -7,14 +7,25 @@
 // 平台检测
 #if defined(_WIN32) || defined(_WIN64)
 #define ENGINE_PLATFORM_WINDOWS 1
+// MSVC 兼容性定义
+#ifdef _MSC_VER
+#define _CRT_NONSTDC_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #endif
 
 // 标准库头文件 - 必须在 Windows.h 之前包含
 #include <cstddef>
 #include <cstdint>
-#include <cmath>
 #include <cstdlib>
 #include <cstring>
+
+// MSVC 下使用 math.h 而不是 cmath（解决 cmath 兼容性问题）
+#ifdef _MSC_VER
+#include <math.h>
+#else
+#include <cmath>
+#endif
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS
