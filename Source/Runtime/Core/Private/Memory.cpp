@@ -4,11 +4,13 @@
 
 #include "Memory.h"
 
-namespace Engine {
+namespace Engine
+{
 
 static HeapAllocator g_defaultAllocator;
 
-IAllocator* GetDefaultAllocator() {
+IAllocator* GetDefaultAllocator()
+{
     return &g_defaultAllocator;
 }
 

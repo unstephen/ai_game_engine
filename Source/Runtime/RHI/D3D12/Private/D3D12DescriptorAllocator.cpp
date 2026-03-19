@@ -4,7 +4,8 @@
 
 #include "D3D12Device.h"
 
-namespace Engine::RHI::D3D12 {
+namespace Engine::RHI::D3D12
+{
 
 // TODO: Task 008 - 实现 D3D12DescriptorAllocator
 

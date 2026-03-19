@@ -4,7 +4,8 @@
 
 #include "Core.h"
 
-namespace Engine {
+namespace Engine
+{
 
 // 占位实现
 

@@ -4,7 +4,8 @@
 
 #include "Window.h"
 
-namespace Engine {
+namespace Engine
+{
 
 // 占位实现 - 将在窗口模块实现
 

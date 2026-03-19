@@ -4,7 +4,8 @@
 
 #include "ISwapChain.h"
 
-namespace Engine::RHI {
+namespace Engine::RHI
+{
 
 // 占位实现 - 将在 Task 007 中实现
 

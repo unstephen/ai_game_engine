@@ -4,7 +4,8 @@
 
 #include "IFrameResourceManager.h"
 
-namespace Engine::RHI {
+namespace Engine::RHI
+{
 
 // 占位实现 - 将在 Task 004 中实现
 
