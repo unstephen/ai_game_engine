@@ -11,6 +11,8 @@
 #ifdef _MSC_VER
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+// MSVC: 必须先包含 math.h，确保 C 数学函数可用
+#include <math.h>
 #endif
 #endif
 
