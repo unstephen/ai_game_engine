@@ -6,14 +6,10 @@
 
 #include "Core.h"
 
+// MSVC 下使用 math.h 而不是 cmath（解决 MSVC cmath 兼容性问题）
 #ifdef _MSC_VER
-// MSVC: 先包含 math.h，避免 cmath 问题
 #include <math.h>
-#endif
-
-#include <algorithm>
-
-#ifndef _MSC_VER
+#else
 #include <cmath>
 #endif
 
