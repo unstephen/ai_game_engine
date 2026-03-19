@@ -11,23 +11,17 @@
 #ifdef _MSC_VER
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#define _USE_MATH_DEFINES
+// GLM 可能包含 <cmath>，确保 C 数学函数可用
+#include <math.h>
 #endif
 #endif
 
-// MSVC: 使用 C 标准库头文件避免 C++ 标准库兼容性问题
-#ifdef _MSC_VER
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdint.h>
-#else
-// 其他平台使用 C++ 标准库头文件
+// 标准库头文件
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#endif
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS

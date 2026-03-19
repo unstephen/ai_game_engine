@@ -1,6 +1,6 @@
 // =============================================================================
 // RHICore.h - RHI 核心类型和工具
-// =============================================================================
+// ============================================================================
 
 #pragma once
 
@@ -12,15 +12,8 @@
 #define RHI_PLATFORM_WINDOWS 1
 #endif
 
-// MSVC 下使用 C 标准库头文件
-#ifdef _MSC_VER
-#include <stddef.h>
-#include <stdint.h>
-#else
 #include <cstddef>
 #include <cstdint>
-#endif
-
 #include <functional>
 #include <memory>
 #include <string_view>
