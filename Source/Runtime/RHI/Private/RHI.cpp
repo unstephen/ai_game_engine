@@ -4,8 +4,14 @@
 
 #include "RHI.h"
 
+// MSVC 下使用 C 标准库头文件
+#ifdef _MSC_VER
+#include <stdarg.h>
+#include <stdio.h>
+#else
 #include <cstdarg>
 #include <cstdio>
+#endif
 
 namespace Engine::RHI
 {

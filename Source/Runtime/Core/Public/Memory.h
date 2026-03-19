@@ -6,7 +6,13 @@
 
 #include "Core.h"
 
+// MSVC 下使用 C 标准库头文件
+#ifdef _MSC_VER
+#include <stdlib.h>
+#else
 #include <cstdlib>
+#endif
+
 #include <new>
 
 namespace Engine

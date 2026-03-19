@@ -4,7 +4,12 @@
 
 #pragma once
 
+// MSVC 下使用 C 标准库头文件
+#ifdef _MSC_VER
+#include <stdint.h>
+#else
 #include <cstdint>
+#endif
 
 namespace Engine::RHI
 {
