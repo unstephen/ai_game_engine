@@ -11,8 +11,6 @@
 #ifdef _MSC_VER
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-// 启用 C99 数学函数名 (sinf, cosf, etc.)
-#define _CRT_DECLARE_NONSTDC_NAMES 1
 #endif
 #endif
 
@@ -21,7 +19,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS
