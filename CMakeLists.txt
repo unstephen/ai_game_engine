@@ -87,7 +87,7 @@ endif()
 # =============================================================================
 
 # GLM 数学库 (Header-only)
-add_subdirectory(ThirdParty/glm)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm)
 
 # DirectX 12
 if(ENGINE_RHI_D3D12)
