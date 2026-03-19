@@ -15,7 +15,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include <math.h>
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS
