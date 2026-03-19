@@ -95,8 +95,11 @@ if(MSVC)
         GLM_FORCE_DEPTH_ZERO_TO_ONE
         GLM_FORCE_LEFT_HANDED
     )
+    # 将 GLM 标记为外部头文件，使用不同的系统头文件行为
+    add_compile_options(/experimental:external /external:I ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm)
+else()
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm)
 endif()
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm)
 
 # DirectX 12
 if(ENGINE_RHI_D3D12)
