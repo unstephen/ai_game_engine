@@ -11,16 +11,22 @@
 #ifdef _MSC_VER
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-// MSVC: 必须在所有其他标准库之前包含 math.h
-#include <math.h>
 #endif
 #endif
 
-// 标准库头文件
+// 标准库头文件 - math.h 在 MSVC 下必须最先包含
+#ifdef _MSC_VER
+#include <math.h>
+#endif
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+
+// 非 MSVC 平台使用 cmath
+#ifndef _MSC_VER
+#include <cmath>
+#endif
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS
