@@ -14,10 +14,11 @@
 #endif
 #endif
 
-// MSVC: math.h 必须在任何标准库头文件之前包含
-// 因为 <cstdlib> 需要 fabs 等函数
+// MSVC: 必须最先包含 math.h 和 stdlib.h
+// 因为其他标准库头文件可能依赖它们
 #ifdef _MSC_VER
 #include <math.h>
+#include <stdlib.h>
 #endif
 
 // 标准库头文件 - 必须在 Windows.h 之前包含
@@ -25,7 +26,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS
