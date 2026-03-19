@@ -86,6 +86,9 @@ endif()
 # 查找依赖
 # =============================================================================
 
+# GLM 数学库 (Header-only)
+add_subdirectory(ThirdParty/glm)
+
 # DirectX 12
 if(ENGINE_RHI_D3D12)
     find_package(directx-headers CONFIG QUIET)

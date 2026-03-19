@@ -1,123 +1,72 @@
 // =============================================================================
-// Math.h - 数学库
+// Math.h - 数学库（基于 GLM）
 // =============================================================================
 
 #pragma once
 
 #include "Core.h"
 
+// GLM 配置
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_LEFT_HANDED
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 namespace Engine
 {
 
+// 导入 GLM 类型
+using Vector2 = glm::vec2;
+using Vector3 = glm::vec3;
+using Vector4 = glm::vec4;
+using Matrix4x4 = glm::mat4;
+using Quaternion = glm::quat;
+
 // 常量
-constexpr float PI         = 3.14159265358979323846f;
+constexpr float PI = 3.14159265358979323846f;
 constexpr float DEG_TO_RAD = PI / 180.0f;
 constexpr float RAD_TO_DEG = 180.0f / PI;
 
 // ============================================================================
-// Vector2
+// 数学工具函数
 // ============================================================================
 
-struct Vector2
+inline Matrix4x4 CreatePerspectiveMatrix(float fov, float aspect, float nearZ, float farZ)
 {
-    float x = 0.0f;
-    float y = 0.0f;
+    return glm::perspectiveLH_ZO(fov, aspect, nearZ, farZ);
+}
 
-    Vector2() = default;
-    Vector2(float x, float y) : x(x), y(y) {}
-
-    Vector2 operator+(const Vector2& rhs) const { return {x + rhs.x, y + rhs.y}; }
-    Vector2 operator-(const Vector2& rhs) const { return {x - rhs.x, y - rhs.y}; }
-    Vector2 operator*(float s) const { return {x * s, y * s}; }
-};
-
-// ============================================================================
-// Vector3
-// ============================================================================
-
-struct Vector3
+inline Matrix4x4 CreateLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up)
 {
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
+    return glm::lookAtLH(eye, target, up);
+}
 
-    Vector3() = default;
-    Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
-
-    Vector3 operator+(const Vector3& rhs) const { return {x + rhs.x, y + rhs.y, z + rhs.z}; }
-    Vector3 operator-(const Vector3& rhs) const { return {x - rhs.x, y - rhs.y, z - rhs.z}; }
-    Vector3 operator*(float s) const { return {x * s, y * s, z * s}; }
-
-    float Length() const;
-    float LengthSq() const { return x * x + y * y + z * z; }
-
-    Vector3 Normalized() const;
-
-    static Vector3 Cross(const Vector3& a, const Vector3& b)
-    {
-        return {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
-    }
-
-    static float Dot(const Vector3& a, const Vector3& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
-};
-
-// ============================================================================
-// Vector4
-// ============================================================================
-
-struct Vector4
+inline Matrix4x4 CreateTranslationMatrix(const Vector3& translation)
 {
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
-    float w = 0.0f;
+    return glm::translate(glm::mat4(1.0f), translation);
+}
 
-    Vector4() = default;
-    Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
-    Vector4(const Vector3& v, float w) : x(v.x), y(v.y), z(v.z), w(w) {}
-};
-
-// ============================================================================
-// Matrix4x4
-// ============================================================================
-
-struct Matrix4x4
+inline Matrix4x4 CreateScaleMatrix(const Vector3& scale)
 {
-    float m[4][4] = {};
+    return glm::scale(glm::mat4(1.0f), scale);
+}
 
-    Matrix4x4()
-    {
-        // 单位矩阵
-        m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
-    }
+inline Matrix4x4 CreateRotationMatrixX(float angle)
+{
+    return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1, 0, 0));
+}
 
-    static Matrix4x4 Identity() { return Matrix4x4(); }
+inline Matrix4x4 CreateRotationMatrixY(float angle)
+{
+    return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 1, 0));
+}
 
-    static Matrix4x4 Translation(float x, float y, float z)
-    {
-        Matrix4x4 result;
-        result.m[3][0] = x;
-        result.m[3][1] = y;
-        result.m[3][2] = z;
-        return result;
-    }
-
-    static Matrix4x4 Scaling(float x, float y, float z)
-    {
-        Matrix4x4 result;
-        result.m[0][0] = x;
-        result.m[1][1] = y;
-        result.m[2][2] = z;
-        return result;
-    }
-
-    static Matrix4x4 RotationX(float angle);
-    static Matrix4x4 RotationY(float angle);
-    static Matrix4x4 RotationZ(float angle);
-    static Matrix4x4 Perspective(float fov, float aspect, float nearZ, float farZ);
-    static Matrix4x4 LookAt(const Vector3& eye, const Vector3& target, const Vector3& up);
-
-    Matrix4x4 operator*(const Matrix4x4& rhs) const;
-};
+inline Matrix4x4 CreateRotationMatrixZ(float angle)
+{
+    return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 0, 1));
+}
 
 } // namespace Engine
