@@ -51,6 +51,7 @@ endif()
 # MSVC 特定设置
 if(MSVC)
     # 解决 MSVC cmath/cstdlib 兼容性问题
+    # _CRT_DECLARE_NONSTDC_NAMES 让 MSVC 在全局命名空间提供 POSIX 函数名
     add_compile_definitions(
         _CRT_NONSTDC_NO_WARNINGS
         _CRT_SECURE_NO_WARNINGS
@@ -65,8 +66,10 @@ if(MSVC)
     add_compile_options(/Zc:__cplusplus)
     # 标准库行为一致
     add_compile_options(/Zc:wchar_t /Zc:inline)
-    
-    endif()
+    # 强制包含 MSVC 兼容头，在 DirectXMath 之前提供 POSIX 数学函数
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Source/Runtime/Core/Public)
+    add_compile_options(/FI"MSVCCompat.h")
+endif()
 
 # 调试层
 if(ENGINE_DEBUG_LAYER)
