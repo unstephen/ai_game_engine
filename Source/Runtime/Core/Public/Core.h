@@ -12,32 +12,13 @@
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
-// MSVC: 必须在 C++ 标准库头文件之前包含 C 标准库头文件
+
+// MSVC 关键修复：使用 _CRT_DECLARE_NONSTDC_NAMES 启用 POSIX 函数名
+// 这会让 MSVC 在全局命名空间提供 sinf/cosf/sqrtf 等函数
+#define _CRT_DECLARE_NONSTDC_NAMES 1
 #include <math.h>
 #include <stdlib.h>
 #include <cmath>
-
-// MSVC 的 C++ 标准库不提供 sinf/cosf/sqrtf 等全局函数
-// DirectXMath 和其他库使用这些 POSIX 命名，需要手动提供
-inline float sinf(float _X) { return std::sin(_X); }
-inline float cosf(float _X) { return std::cos(_X); }
-inline float tanf(float _X) { return std::tan(_X); }
-inline float sqrtf(float _X) { return std::sqrt(_X); }
-inline float asinf(float _X) { return std::asin(_X); }
-inline float acosf(float _X) { return std::acos(_X); }
-inline float atanf(float _X) { return std::atan(_X); }
-inline float atan2f(float _Y, float _X) { return std::atan2(_Y, _X); }
-inline float powf(float _X, float _Y) { return std::pow(_X, _Y); }
-inline float expf(float _X) { return std::exp(_X); }
-inline float logf(float _X) { return std::log(_X); }
-inline float log10f(float _X) { return std::log10(_X); }
-inline float fabsf(float _X) { return std::fabs(_X); }
-inline float floorf(float _X) { return std::floor(_X); }
-inline float ceilf(float _X) { return std::ceil(_X); }
-inline float roundf(float _X) { return std::round(_X); }
-inline float fmodf(float _X, float _Y) { return std::fmod(_X, _Y); }
-inline float modff(float _X, float* _Ip) { return std::modf(_X, _Ip); }
-#endif
 #endif
 
 // 标准库头文件
