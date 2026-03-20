@@ -68,7 +68,8 @@ if(MSVC)
     
     # 强制包含 Platform.h 在所有编译单元之前
     # 这样 sinf/cosf/sqrtf 函数定义会全局生效
-    add_compile_options("/FI\"Source/Runtime/Core/Public/Core/Platform.h\"")
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Source/Runtime/Core/Public)
+    add_compile_options(/FI"Core/Platform.h")
 endif()
 
 # 调试层
