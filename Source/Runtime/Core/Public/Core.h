@@ -7,25 +7,28 @@
 // 平台检测
 #if defined(_WIN32) || defined(_WIN64)
 #define ENGINE_PLATFORM_WINDOWS 1
-// MSVC 兼容性定义
-#ifdef _MSC_VER
-#define _CRT_NONSTDC_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#define _USE_MATH_DEFINES
-
-// MSVC 关键修复：使用 _CRT_DECLARE_NONSTDC_NAMES 启用 POSIX 函数名
-// 这会让 MSVC 在全局命名空间提供 sinf/cosf/sqrtf 等函数
-#define _CRT_DECLARE_NONSTDC_NAMES 1
-#include <math.h>
-#include <stdlib.h>
-#include <cmath>
 #endif
 
-// 标准库头文件
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
+// MSVC 兼容性定义
+#ifdef _MSC_VER
+// 必须在任何标准库头文件之前定义
+#ifndef _CRT_NONSTDC_NO_WARNINGS
+#define _CRT_NONSTDC_NO_WARNINGS
+#endif
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#endif
+
+// 标准库头文件 - 使用 C 风格头文件避免 MSVC <cmath> 问题
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 // Windows 头文件 (在标准库之后包含)
 #if ENGINE_PLATFORM_WINDOWS
